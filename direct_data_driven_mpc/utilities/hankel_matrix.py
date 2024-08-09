@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 def hankel_matrix(X: np.ndarray, L: int) -> np.ndarray:
@@ -49,3 +51,37 @@ def hankel_matrix(X: np.ndarray, L: int) -> np.ndarray:
         HL[:, i] = X[i: i + L, :].flatten()
     
     return HL
+
+def evaluate_persistent_excitation(
+    X: np.ndarray,
+    order: int
+) -> Tuple[int, bool]:
+    """
+    Evaluate whether a data sequence `X` is persistently exciting of a given
+    order based on the rank of its Hankel matrix. The matrix `X` consists of a
+    sequence of `N` elements, each of length `n`.
+
+    This is determined by checking if the rank of the Hankel matrix
+    constructed from `X` is equal to the expected rank `n * order`.
+
+    Args:
+        X (np.ndarray): Input data matrix of shape (N, n), where N is the
+            number of elements, and n is the length of each element.
+        order (int): The order of persistent excitation to evaluate.
+
+    Returns:
+        Tuple[int, bool]: A tuple containing the rank of the Hankel matrix and
+            a boolean indicating whether `X` is persistently exciting of the
+            given order.
+    """
+    # Get data sequence element length
+    n = X.shape[1]
+    # Construct Hankel matrix from X
+    H_order = hankel_matrix(X, order)
+    # Calculate the Hankel matrix order
+    rank_H_order = np.linalg.matrix_rank(H_order)
+
+    # Evaluate the persistently exiting nature of X
+    pers_exciting = (rank_H_order == n * (order))
+    
+    return rank_H_order, pers_exciting
