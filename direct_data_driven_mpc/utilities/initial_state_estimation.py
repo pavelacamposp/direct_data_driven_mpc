@@ -92,3 +92,66 @@ def toeplitz_input_output_matrix(
     
     return Tt
 
+def calculate_output_equilibrium_setpoint(
+    A: np.ndarray,
+    B: np.ndarray,
+    C: np.ndarray,
+    D: np.ndarray,
+    u_s: np.ndarray
+) -> np.ndarray:
+    """
+    Calculate the output setpoint `y_s` corresponding to the input setpoint
+    `u_s` so they represent an equilibrium pair of the system defined by
+    matrices A (state), B (input), C (output) and D (feedforward).
+
+    Args:
+        A (np.ndarray): The State matrix of the system.
+        B (np.ndarray): The Input matrix of the system.
+        C (np.ndarray): The Output matrix of the system.
+        D (np.ndarray): The Feedforward matrix of the system.
+        u_s (np.ndarray): An input setpoint array of the system.
+
+    Returns:
+        np.ndarray: The output equilibrium setpoint `y_s` corresponding to the
+            input setpoint `u_s`.
+    """
+    n = A.shape[0] # Order of the system
+
+    # Calculate equilibrium output using the final value theorem,
+    # assuming zero initial conditions
+    M = C @ np.linalg.inv(np.eye(n) - A) @ B + D
+    y_s = M @ u_s
+
+    return y_s
+
+def calculate_input_equilibrium_setpoint(
+    A: np.ndarray,
+    B: np.ndarray,
+    C: np.ndarray,
+    D: np.ndarray,
+    y_s: np.ndarray
+) -> np.ndarray:
+    """
+    Calculate the input setpoint `u_s` corresponding to the output setpoint
+    `y_s` so they represent an equilibrium pair of the system defined by
+    matrices A (state), B (input), C (output) and D (feedforward).
+
+    Args:
+        A (np.ndarray): The State matrix of the system.
+        B (np.ndarray): The Input matrix of the system.
+        C (np.ndarray): The Output matrix of the system.
+        D (np.ndarray): The Feedforward matrix of the system.
+        y_s (np.ndarray): An output setpoint array of the system.
+
+    Returns:
+        np.ndarray: The input equilibrium setpoint `u_s` corresponding to the
+            output setpoint `y_s`.
+    """
+    n = A.shape[0] # Order of the system
+
+    # Calculate equilibrium input using the final value theorem,
+    # assuming zero initial conditions
+    M = C @ np.linalg.inv(np.eye(n) - A) @ B + D
+    u_s = np.linalg.pinv(M) @ y_s
+
+    return u_s
