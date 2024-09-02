@@ -10,8 +10,8 @@ def observability_matrix(A: np.ndarray, C: np.ndarray) -> np.ndarray:
     A matrix.
 
     Args:
-        A (np.ndarray): The State matrix.
-        C (np.ndarray): The Output matrix.
+        A (np.ndarray): The State matrix of the system.
+        C (np.ndarray): The Output matrix of the system.
     
     Returns:
         np.ndarray: The observability matrix of the system.
@@ -44,10 +44,10 @@ def toeplitz_input_output_matrix(
           [CAB CB  D]]
     
     Args:
-        A (np.ndarray): The State matrix.
-        B (np.ndarray): The Input matrix.
-        C (np.ndarray): The Output matrix.
-        D (np.ndarray): The Feedforward matrix.
+        A (np.ndarray): The State matrix of the system.
+        B (np.ndarray): The Input matrix of the system.
+        C (np.ndarray): The Output matrix of the system.
+        D (np.ndarray): The Feedforward matrix of the system.
         t (int): The number of time steps for the Toeplitz matrix extension.
     
     Returns:
