@@ -872,13 +872,13 @@ class DirectDataDrivenMPCController():
         # y[t-n, t-1]
         self.y_past = np.vstack([self.y_past[self.p:], y_current])
         
-    def update_past_input_output_data(
+    def set_past_input_output_data(
         self,
         new_u_past: np.ndarray,
         new_y_past: np.ndarray,
     ) -> None:
         """
-        Update the storage variables for past input-output measurements.
+        Set the storage variables for past input-output measurements.
 
         This method assigns the provided input-output measurements to the
         arrays storing past input-output measurements, `u_past` and `y_past`.
@@ -899,7 +899,7 @@ class DirectDataDrivenMPCController():
                 dimensions.
 
         Note:
-            This method updates the values of the `u_past` and `y_past`
+            This method sets the values of the `u_past` and `y_past`
             attributes with the provided new historical data.
         """
         # Validate input types and dimensions
