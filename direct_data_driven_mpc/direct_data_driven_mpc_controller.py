@@ -919,3 +919,42 @@ class DirectDataDrivenMPCController():
         self.u_past = new_u_past
         # y[t-n, t-1]
         self.y_past = new_y_past
+    
+    def set_input_output_setpoints(
+        self,
+        new_u_s: np.ndarray,
+        new_y_s: np.ndarray
+    ) -> None:
+        """
+        Set the control and system setpoints of the Data-Driven MPC controller.
+
+        This method updates the control and system setpoints, `u_s` and `y_s`
+        to the provided values `new_u_s` and `new_y_s`. Then, it reinitializes
+        the controller to redefine the Data-Driven MPC formulation.
+
+        Args:
+            new_u_s (np.ndarray): The setpoint for control inputs.
+            new_y_s (np.ndarray): The setpoint for system outputs.
+        
+        Raises:
+            ValueError: If `new_u_s` or `new_y_s` do not have the expected
+                dimensions.
+            
+        Note:
+            This method sets the values of the `u_s` and `y_s` attributes with
+            the provided new setpoints.
+        """
+        # Validate input types and dimensions
+        if new_u_s.shape != self.u_s.shape:
+            raise ValueError(f"Incorrect dimensions. u_s must have shape "
+                             f"{self.u_s.shape}, got {new_u_s.shape}")
+        if new_y_s.shape != self.y_s.shape:  # Replace with actual expected shape
+            raise ValueError(f"Incorrect dimensions. y_s must have shape "
+                             f"{self.y_s.shape}, got {new_y_s.shape}")
+    
+        # Update Input-Output setpoint pairs
+        self.u_s = new_u_s
+        self.y_s = new_y_s
+
+        # Reinitialize Data-Driven MPC controller
+        self.initialize_data_driven_mpc()
