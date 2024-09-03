@@ -92,6 +92,46 @@ def toeplitz_input_output_matrix(
     
     return Tt
 
+def estimate_initial_state(
+    Ot: np.ndarray,
+    Tt: np.ndarray,
+    U: np.ndarray,
+    Y: np.ndarray
+) -> np.ndarray:
+    """
+    Estimate the initial state of an observable system based on its
+    input-output history using a least squares observer with the Toeplitz
+    input-output and observability matrices of the system.
+
+    Args:
+        Ot (np.ndarray): The observability matrix of the system.
+        Tt (np.ndarray): The Toeplitz input-output matrix of the system over
+            `t` steps.
+        U (np.ndarray): The vector of inputs over the past `t` time steps.
+        Y (np.ndarray): The vector of outputs over the past `t` time steps.
+    
+    Returns:
+        np.ndarray: The estimated initial state.
+    
+    Raises:
+        ValueError: If there is a dimension mismatch between the inputs.
+    """
+    # Check correct matrix dimensions
+    if Ot.shape[0] != Y.shape[0]:
+        raise ValueError(f"Dimension mismatch: Ot has {Ot.shape[0]} rows but "
+                         f"Y has {Y.shape[0]} rows.")
+    if Tt.shape[0] != Y.shape[0]:
+        raise ValueError(f"Dimension mismatch: Tt has {Tt.shape[0]} rows but "
+                         f"Y has {Y.shape[0]} rows.")
+    if Tt.shape[1] != U.shape[0]:
+        raise ValueError(f"Dimension mismatch: Tt has {Tt.shape[1]} columns "
+                         f"but U has {U.shape[0]} rows.")
+    
+    # Estimate initial state based on input-output data
+    initial_x = np.linalg.pinv(Ot) @ (Y - Tt @ U)
+
+    return initial_x
+
 def calculate_output_equilibrium_setpoint(
     A: np.ndarray,
     B: np.ndarray,
