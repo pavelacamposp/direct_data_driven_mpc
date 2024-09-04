@@ -3,6 +3,7 @@ from typing import Tuple, Optional, List
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
+from tqdm import tqdm
 import os
 
 def plot_input_output(
@@ -224,10 +225,12 @@ def save_animation(
     file_path: str
 ) -> None:
     """
-    Save a Matplotlib animation using an ffmpeg writer.
+    Save a Matplotlib animation using an ffmpeg writer with progress bar
+    tracking.
 
     This function saves the given Matplotlib animation to the specified file
-    path. If the file path contain directories that do not exist, they will be
+    path and displays a progress bar the console to track the saving progress.
+    If the file path contains directories that do not exist, they will be
     created.
 
     Args:
@@ -240,11 +243,16 @@ def save_animation(
     # Ensure the directory exists
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # Set up the ffmpeg writer and save the animation
+    # Set up the ffmpeg writer
     writer = FFMpegWriter(fps=fps,
                           metadata=dict(artist='Me'),
                           bitrate=bitrate)
-    animation.save(file_path, writer=writer)
+    
+    # Save animation while displaying a progress bar
+    with tqdm(total=animation.save_count, desc="Saving animation") as pbar:
+        animation.save(file_path,
+                       writer=writer,
+                       progress_callback=lambda i, n: pbar.update(1))
 
 def get_padded_limits(
     X: np.ndarray,
