@@ -16,7 +16,7 @@ setuptools.setup(
     url='https://github.com/pavelacamposp/direct-data-driven-mpc',
     packages=setuptools.find_packages(include=["direct_data_driven_mpc*",
                                                "models*"]),
-    install_requires=['numpy', 'matplotlib', 'cvxpy'],
+    install_requires=['numpy', 'matplotlib', 'cvxpy', 'tqdm'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
