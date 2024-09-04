@@ -3,11 +3,11 @@ import numpy as np
 def observability_matrix(A: np.ndarray, C: np.ndarray) -> np.ndarray:
     """
     Calculate the observability matrix for a state-space system defined by
-    state matrix A and output matrix C.
+    state matrix `A` and output matrix `C`.
 
-    The observability matrix is constructed over n time-steps, where n is the
-    number of states in the system, which corresponds to the dimension of the
-    A matrix.
+    The observability matrix is constructed over `n` time steps, where `n` is
+    the number of states in the system, which corresponds to the dimension of
+    the `A` matrix.
 
     Args:
         A (np.ndarray): The State matrix of the system.
@@ -32,7 +32,7 @@ def toeplitz_input_output_matrix(
 ) -> np.ndarray:
     """
     Construct a Toeplitz matrix that maps inputs to outputs for a state-space
-    system defined by matrices A (state), B (input), C (output) and D
+    system defined by matrices `A` (state), `B` (input), `C` (output) and `D`
     (feedforward), over the time interval [0, t-1].
 
     This matrix is used to express the linear response of the system outputs
@@ -142,7 +142,7 @@ def calculate_output_equilibrium_setpoint(
     """
     Calculate the output setpoint `y_s` corresponding to the input setpoint
     `u_s` so they represent an equilibrium pair of the system defined by
-    matrices A (state), B (input), C (output) and D (feedforward).
+    matrices `A` (state), `B` (input), `C` (output) and `D` (feedforward).
 
     Args:
         A (np.ndarray): The State matrix of the system.
@@ -174,7 +174,7 @@ def calculate_input_equilibrium_setpoint(
     """
     Calculate the input setpoint `u_s` corresponding to the output setpoint
     `y_s` so they represent an equilibrium pair of the system defined by
-    matrices A (state), B (input), C (output) and D (feedforward).
+    matrices `A` (state), `B` (input), `C` (output) and `D` (feedforward).
 
     Args:
         A (np.ndarray): The State matrix of the system.
