@@ -71,49 +71,63 @@ def plot_input_output(
     if y_ylimit and len(y_ylimit) != p:
         raise ValueError(f"The length of `y_ylimit` ({len(y_ylimit)}) does "
                          f"not match the number of output subplots ({p}).")
+    
+    # Create figure
+    fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
+    
+    # Modify constrained layout padding
+    fig.set_constrained_layout_pads(
+        w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
+
+    # Create subfigures for input and output data plots
+    subfigs = fig.subfigures(2, 1)
+
+    # Add titles for input and output subfigures
+    subfigs[0].suptitle('Control Inputs',
+                        fontsize=fontsize + 2,
+                        fontweight='bold')
+    subfigs[1].suptitle('System Outputs',
+                        fontsize=fontsize + 2,
+                        fontweight='bold')
 
     # Create subplots
-    _, axs = plt.subplots(2, max(m, p), figsize=figsize, dpi=dpi)
-
-    # Ensure axs is always 2D
-    if max(m, p) == 1:
-        axs = axs.reshape(2, -1)
+    axs_u = subfigs[0].subplots(1, max(m, p))
+    axs_y = subfigs[1].subplots(1, max(m, p))
 
     # Plot data
     for i in range(m):
         # Plot input data
-        axs[0, i].plot(range(0, T), u_k[:, i], label=f'$u_{i+1}$')
+        axs_u[i].plot(range(0, T), u_k[:, i], label=f'$u_{i+1}$')
         # Plot input setpoint
-        axs[0, i].plot(
+        axs_u[i].plot(
             range(0, T), np.full(T, u_s[i, :]), label=f'$u_{i+1}^s$')
-        axs[0, i].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs[0, i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
-        axs[0, i].legend(fontsize=fontsize)
-        axs[0, i].set_xlim([0, T])
-        axs[0, i].tick_params(axis='both', labelsize=fontsize)
+        axs_u[i].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs_u[i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
+        axs_u[i].legend(fontsize=fontsize)
+        axs_u[i].set_xlim([0, T])
+        axs_u[i].tick_params(axis='both', labelsize=fontsize)
 
         # Set y-limits if provided
         if u_ylimit and u_ylimit[i]:
-            axs[0, i].set_ylim(u_ylimit[i])
+            axs_u[i].set_ylim(u_ylimit[i])
 
     for j in range(p):
         # Plot output data
-        axs[1, j].plot(range(0, T), y_k[:, j], label=f'$y_{j+1}$')
+        axs_y[j].plot(range(0, T), y_k[:, j], label=f'$y_{j+1}$')
         # Plot output setpoint
-        axs[1, j].plot(
+        axs_y[j].plot(
             range(0, T), np.full(T, y_s[j, :]), label=f'$y_{j+1}^s$')
-        axs[1, j].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs[1, j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
-        axs[1, j].legend(fontsize=fontsize)
-        axs[1, j].set_xlim([0, T])
-        axs[1, j].tick_params(axis='both', labelsize=fontsize)
+        axs_y[j].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs_y[j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
+        axs_y[j].legend(fontsize=fontsize)
+        axs_y[j].set_xlim([0, T])
+        axs_y[j].tick_params(axis='both', labelsize=fontsize)
 
         # Set y-limits if provided
         if y_ylimit and y_ylimit[j]:
-            axs[1, j].set_ylim(y_ylimit[j])
+            axs_y[j].set_ylim(y_ylimit[j])
 
-    # Adjust layout and show the plot
-    plt.tight_layout()
+    # Show the plot
     plt.show()
 
 def plot_input_output_animation(
@@ -161,52 +175,67 @@ def plot_input_output_animation(
     p = y_k.shape[1] # Number of outputs
     T = u_k.shape[0] # Length of data
 
-    # Create subplots
-    fig, axs = plt.subplots(2, max(m, p), figsize=figsize, dpi=dpi)
+    # Create figure
+    fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
+    
+    # Modify constrained layout padding
+    fig.set_constrained_layout_pads(
+        w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
 
-    # Ensure axs is always 2D
-    if max(m, p) == 1:
-        axs = axs.reshape(2, -1)
+    # Create subfigures for input and output data plots
+    subfigs = fig.subfigures(2, 1)
+
+    # Add titles for input and output subfigures
+    subfigs[0].suptitle('Control Inputs',
+                        fontsize=fontsize + 2,
+                        fontweight='bold')
+    subfigs[1].suptitle('System Outputs',
+                        fontsize=fontsize + 2,
+                        fontweight='bold')
+    
+    # Create subplots
+    axs_u = subfigs[0].subplots(1, max(m, p))
+    axs_y = subfigs[1].subplots(1, max(m, p))
 
     # Initialize lines for inputs and outputs
-    u_lines = [axs[0, i].plot([], [], label=f'$u_{i+1}$')[0]
+    u_lines = [axs_u[i].plot([], [], label=f'$u_{i+1}$')[0]
                for i in range(m)]
-    y_lines = [axs[1, j].plot([], [], label=f'$y_{j+1}$')[0]
+    y_lines = [axs_y[j].plot([], [], label=f'$y_{j+1}$')[0]
                for j in range(p)]
     
     # Plot setpoint lines
     for i in range(m):
         # Plot input setpoint
-        axs[0, i].plot(
+        axs_u[i].plot(
             range(0, T), np.full(T, u_s[i, :]), label=f'$u_{i+1}^s$')
     for j in range(p):
         # Plot output setpoint
-        axs[1, j].plot(
+        axs_y[j].plot(
             range(0, T), np.full(T, y_s[j, :]), label=f'$y_{j+1}^s$')
     
     # Add labels, legends and define axis limits for plots
     for i in range(m):
         # Set axis labels and legends
-        axs[0, i].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs[0, i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
-        axs[0, i].legend(fontsize=fontsize)
-        axs[0, i].tick_params(axis='both', labelsize=fontsize)
+        axs_u[i].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs_u[i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
+        axs_u[i].legend(fontsize=fontsize)
+        axs_u[i].tick_params(axis='both', labelsize=fontsize)
 
         # Define axis limits
         u_lim_min, u_lim_max = get_padded_limits(u_k[:, i], u_s[i, :])
-        axs[0, i].set_xlim(0, T)
-        axs[0, i].set_ylim(u_lim_min, u_lim_max)
+        axs_u[i].set_xlim(0, T)
+        axs_u[i].set_ylim(u_lim_min, u_lim_max)
     for j in range(p):
         # Set axis labels and legends
-        axs[1, j].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs[1, j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
-        axs[1, j].legend(fontsize=fontsize)
-        axs[1, j].tick_params(axis='both', labelsize=fontsize)
+        axs_y[j].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs_y[j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
+        axs_y[j].legend(fontsize=fontsize, loc='lower right')
+        axs_y[j].tick_params(axis='both', labelsize=fontsize)
 
         # Define axis limits
         y_lim_min, y_lim_max = get_padded_limits(y_k[:, j], y_s[j, :])
-        axs[1, j].set_xlim(0, T)
-        axs[1, j].set_ylim(y_lim_min, y_lim_max)
+        axs_y[j].set_xlim(0, T)
+        axs_y[j].set_ylim(y_lim_min, y_lim_max)
 
     # Animation update function
     def update(frame):
@@ -220,9 +249,6 @@ def plot_input_output_animation(
 
     # Create animation
     animation = FuncAnimation(fig, update, frames=T, interval=interval, blit=True)
-
-    # Adjust layout
-    plt.tight_layout()
 
     return animation
 
