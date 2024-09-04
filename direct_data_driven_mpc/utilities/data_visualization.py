@@ -15,6 +15,7 @@ def plot_input_output(
     dpi: int = 300,
     u_ylimit: Optional[List[Tuple[float, float]]] = None,
     y_ylimit: Optional[List[Tuple[float, float]]] = None,
+    fontsize: int = 12
 ) -> None:
     """
     Plot input-output data with setpoints in a Matplotlib figure.
@@ -42,6 +43,7 @@ def plot_input_output(
             specifying the Y-axis limits for the input subplots.
         y_ylimit (Optional[List[Tuple[float, float]]]): A list of tuples
             specifying the Y-axis limits for the output subplots.
+        fontsize (int): The fontsize for labels, legends and axes ticks.
     
     Raises:
         ValueError: If any array dimensions mismatch expected shapes or if the
@@ -84,10 +86,11 @@ def plot_input_output(
         # Plot input setpoint
         axs[0, i].plot(
             range(0, T), np.full(T, u_s[i, :]), label=f'$u_{i+1}^s$')
-        axs[0, i].set_xlabel('$k$', fontsize=14)
-        axs[0, i].set_ylabel(f'$u_{i+1}$', fontsize=14)
-        axs[0, i].legend()
+        axs[0, i].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs[0, i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
+        axs[0, i].legend(fontsize=fontsize)
         axs[0, i].set_xlim([0, T])
+        axs[0, i].tick_params(axis='both', labelsize=fontsize)
 
         # Set y-limits if provided
         if u_ylimit and u_ylimit[i]:
@@ -99,10 +102,11 @@ def plot_input_output(
         # Plot output setpoint
         axs[1, j].plot(
             range(0, T), np.full(T, y_s[j, :]), label=f'$y_{j+1}^s$')
-        axs[1, j].set_xlabel('$k$', fontsize=14)
-        axs[1, j].set_ylabel(f'$y_{j+1}$', fontsize=14)
-        axs[1, j].legend()
+        axs[1, j].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs[1, j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
+        axs[1, j].legend(fontsize=fontsize)
         axs[1, j].set_xlim([0, T])
+        axs[1, j].tick_params(axis='both', labelsize=fontsize)
 
         # Set y-limits if provided
         if y_ylimit and y_ylimit[j]:
@@ -119,7 +123,8 @@ def plot_input_output_animation(
     y_s: np.ndarray,
     figsize: Tuple[int, int] = (12, 8),
     dpi: int = 300,
-    interval: int = 10
+    interval: int = 10,
+    fontsize: int = 12
 ) -> FuncAnimation:
     """
     Create a Matplotlib animation showing the progression of input-output data
@@ -140,6 +145,7 @@ def plot_input_output_animation(
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
         interval (int): The time between frames in milliseconds.
+        fontsize (int): The fontsize for labels, legends and axes ticks.
     """
     # Check input-output data dimensions
     if not (u_k.shape[0] == y_k.shape[0]):
@@ -181,9 +187,10 @@ def plot_input_output_animation(
     # Add labels, legends and define axis limits for plots
     for i in range(m):
         # Set axis labels and legends
-        axs[0, i].set_xlabel('$k$', fontsize=14)
-        axs[0, i].set_ylabel(f'$u_{i+1}$', fontsize=14)
-        axs[0, i].legend()
+        axs[0, i].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs[0, i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
+        axs[0, i].legend(fontsize=fontsize)
+        axs[0, i].tick_params(axis='both', labelsize=fontsize)
 
         # Define axis limits
         u_lim_min, u_lim_max = get_padded_limits(u_k[:, i], u_s[i, :])
@@ -191,9 +198,10 @@ def plot_input_output_animation(
         axs[0, i].set_ylim(u_lim_min, u_lim_max)
     for j in range(p):
         # Set axis labels and legends
-        axs[1, j].set_xlabel('$k$', fontsize=14)
-        axs[1, j].set_ylabel(f'$y_{j+1}$', fontsize=14)
-        axs[1, j].legend()
+        axs[1, j].set_xlabel('Time step $k$', fontsize=fontsize)
+        axs[1, j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
+        axs[1, j].legend(fontsize=fontsize)
+        axs[1, j].tick_params(axis='both', labelsize=fontsize)
 
         # Define axis limits
         y_lim_min, y_lim_max = get_padded_limits(y_k[:, j], y_s[j, :])
