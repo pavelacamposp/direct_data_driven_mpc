@@ -497,6 +497,7 @@ def plot_input_output_animation(
 
 def save_animation(
     animation: FuncAnimation,
+    total_frames: int,
     fps: int,
     bitrate: int,
     file_path: str
@@ -512,6 +513,7 @@ def save_animation(
 
     Args:
         animation (FuncAnimation): The animation object to save.
+        total_frames (int): The total number of frames in the animation.
         fps (int): The frames per second of saved video.
         bitrate (int): The bitrate of saved video.
         file_path (str): The path (including directory and file name) where 
@@ -526,7 +528,7 @@ def save_animation(
                           bitrate=bitrate)
     
     # Save animation while displaying a progress bar
-    with tqdm(total=animation.save_count, desc="Saving animation") as pbar:
+    with tqdm(total=total_frames, desc="Saving animation") as pbar:
         animation.save(file_path,
                        writer=writer,
                        progress_callback=lambda i, n: pbar.update(1))
