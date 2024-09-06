@@ -46,10 +46,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-from direct_data_driven_mpc.utilities.initial_state_estimation import (
+from utilities.initial_state_estimation import (
     observability_matrix, toeplitz_input_output_matrix,
     estimate_initial_state, calculate_output_equilibrium_setpoint)
-from direct_data_driven_mpc.utilities.data_visualization import (
+from utilities.data_visualization import (
     plot_input_output, plot_input_output_animation, save_animation)
 
 from direct_data_driven_mpc.direct_data_driven_mpc_controller import (

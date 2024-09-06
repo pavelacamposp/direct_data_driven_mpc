@@ -15,6 +15,7 @@ setuptools.setup(
     author_email='pcamposp@uni.pe',
     url='https://github.com/pavelacamposp/direct-data-driven-mpc',
     packages=setuptools.find_packages(include=["direct_data_driven_mpc*",
+                                               "utilities*",
                                                "models*"]),
     install_requires=['numpy', 'matplotlib', 'cvxpy', 'tqdm'],
     classifiers=[
