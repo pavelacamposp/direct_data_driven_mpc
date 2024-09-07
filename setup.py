@@ -17,7 +17,7 @@ setuptools.setup(
     packages=setuptools.find_packages(include=["direct_data_driven_mpc*",
                                                "utilities*",
                                                "models*"]),
-    install_requires=['numpy', 'matplotlib>=3.9.0', 'cvxpy', 'tqdm'],
+    install_requires=['numpy', 'matplotlib>=3.9.0', 'cvxpy', 'tqdm', 'pyyaml'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
