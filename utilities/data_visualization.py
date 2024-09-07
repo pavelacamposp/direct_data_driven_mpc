@@ -1,4 +1,6 @@
 from typing import Tuple, Optional, List
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 from matplotlib.text import Text
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -38,7 +40,8 @@ def plot_input_output(
     the data-driven system characterization phase in a Data-Driven MPC
     algorithm. Additionally, custom labels can be displayed to indicate the
     initial measurement and the subsequent MPC control periods, but only if
-    there is sufficient space to prevent them from overflowing the plots.
+    there is enough space to prevent them from overlapping with other plot
+    elements.
 
     Args:
         u_k (np.ndarray): An array containing control input data of shape (T,
@@ -89,7 +92,6 @@ def plot_input_output(
     # Retrieve number of input and output data sequences and their length
     m = u_k.shape[1] # Number of inputs
     p = y_k.shape[1] # Number of outputs
-    T = u_k.shape[0] # Length of data
 
     # Error handling for y-limit lengths
     if u_ylimit and len(u_ylimit) != u_k.shape[1]:
@@ -121,127 +123,155 @@ def plot_input_output(
     axs_u = subfigs[0].subplots(1, max(m, p))
     axs_y = subfigs[1].subplots(1, max(m, p))
 
-    # Plot data
+    # Plot input data
     for i in range(m):
-        # Plot input data
-        axs_u[i].plot(range(0, T), u_k[:, i], label=f'$u_{i+1}$')
-        # Plot input setpoint
-        axs_u[i].plot(
-            range(0, T), np.full(T, u_s[i, :]), label=f'$u_{i+1}^s$')
-        
-        # Highlight initial input-output data measurement period if provided
-        if initial_steps:
-            # Highlight period with a grayed rectangle
-            axs_u[i].axvspan(0, initial_steps, color='gray', alpha=0.1)
-            # Add a vertical line at the right side of the rectangle
-            axs_u[i].axvline(x=initial_steps, color='black',
-                             linestyle=(0, (5, 5)), linewidth=1)
-            
-            # Display initial measurement text if enabled
-            if display_initial_text:
-                # Get y-axis limits
-                y_min, y_max = axs_u[i].get_ylim()
-                # Place label at the center of the highlighted area
-                u_init_text = axs_u[i].text(
-                    initial_steps / 2, (y_min + y_max) / 2,
-                    initial_text, fontsize=fontsize - 1,
-                    ha='center', va='center', color='black',
-                    bbox=dict(facecolor='white', edgecolor='black'))
-                # Get initial text bounding box width
-                init_text_width = get_text_width_in_data(
-                    text_object=u_init_text, axis=axs_u[i], fig=fig)
-                # Hide text box if it overflows the plot area
-                if initial_steps < init_text_width:
-                    u_init_text.set_visible(False)
-            
-            # Display Data-Driven MPC control text if enabled
-            if display_control_text:
-                # Get y-axis limits
-                y_min, y_max = axs_u[i].get_ylim()
-                # Place label at the center of the remaining area
-                u_control_text = axs_u[i].text(
-                    (T + initial_steps) / 2, (y_min + y_max) / 2,
-                    control_text, fontsize=fontsize - 1,
-                    ha='center', va='center', color='black',
-                    bbox=dict(facecolor='white', edgecolor='black'))
-                # Get control text bounding box width
-                control_text_width = get_text_width_in_data(
-                    text_object=u_control_text, axis=axs_u[0], fig=fig)
-                # Hide text box if it overflows the plot area
-                if (T - initial_steps) < control_text_width:
-                    u_control_text.set_visible(False)
-            
-        axs_u[i].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs_u[i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
-        axs_u[i].legend(fontsize=fontsize)
-        axs_u[i].set_xlim([0, T])
-        axs_u[i].tick_params(axis='both', labelsize=fontsize)
+        plot_data(axis=axs_u[i],
+                  data=u_k[:, i],
+                  setpoint=u_s[i, :],
+                  index=i,
+                  var_symbol="u",
+                  var_label="Input",
+                  initial_steps=initial_steps,
+                  initial_text=initial_text,
+                  control_text=control_text,
+                  display_initial_text=display_initial_text,
+                  display_control_text=display_control_text,
+                  ylimit=u_ylimit,
+                  fontsize=fontsize,
+                  fig=fig)
 
-        # Set y-limits if provided
-        if u_ylimit and u_ylimit[i]:
-            axs_u[i].set_ylim(u_ylimit[i])
-
+    # Plot output data
     for j in range(p):
-        # Plot output data
-        axs_y[j].plot(range(0, T), y_k[:, j], label=f'$y_{j+1}$')
-        # Plot output setpoint
-        axs_y[j].plot(
-            range(0, T), np.full(T, y_s[j, :]), label=f'$y_{j+1}^s$')
-        
-        # Highlight initial input-output data measurement period if provided
-        if initial_steps:
-            # Highlight period with a grayed rectangle
-            axs_y[j].axvspan(0, initial_steps, color='gray', alpha=0.1)
-            # Add a vertical line at the right side of the rectangle
-            axs_y[j].axvline(x=initial_steps, color='black',
-                             linestyle=(0, (5, 5)), linewidth=1)
-            
-            # Display initial measurement text if enabled
-            if display_initial_text:
-                # Get y-axis limits
-                y_min, y_max = axs_y[j].get_ylim()
-                # Place label at the center of the highlighted area
-                y_init_text = axs_y[j].text(
-                    initial_steps / 2, (y_min + y_max) / 2,
-                    initial_text, fontsize=fontsize - 1,
-                    ha='center', va='center', color='black',
-                    bbox=dict(facecolor='white', edgecolor='black'))
-                # Get initial text bounding box width
-                init_text_width = get_text_width_in_data(
-                    text_object=y_init_text, axis=axs_u[i], fig=fig)
-                # Hide text box if it overflows the plot area
-                if initial_steps < init_text_width:
-                    y_init_text.set_visible(False)
-            
-            # Display Data-Driven MPC control text if enabled
-            if display_control_text:
-                # Get y-axis limits
-                y_min, y_max = axs_y[j].get_ylim()
-                # Place label at the center of the remaining area
-                y_control_text = axs_y[j].text(
-                    (T + initial_steps) / 2, (y_min + y_max) / 2,
-                    control_text, fontsize=fontsize - 1,
-                    ha='center', va='center', color='black',
-                    bbox=dict(facecolor='white', edgecolor='black'))
-                # Get control text bounding box width
-                control_text_width = get_text_width_in_data(
-                    text_object=y_control_text, axis=axs_u[0], fig=fig)
-                # Hide text box if it overflows the plot area
-                if (T - initial_steps) < control_text_width:
-                    y_control_text.set_visible(False)
-        
-        axs_y[j].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs_y[j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
-        axs_y[j].legend(fontsize=fontsize)
-        axs_y[j].set_xlim([0, T])
-        axs_y[j].tick_params(axis='both', labelsize=fontsize)
-
-        # Set y-limits if provided
-        if y_ylimit and y_ylimit[j]:
-            axs_y[j].set_ylim(y_ylimit[j])
+        plot_data(axis=axs_y[j],
+                  data=y_k[:, j],
+                  setpoint=y_s[j, :],
+                  index=j,
+                  var_symbol="y",
+                  var_label="Output",
+                  initial_steps=initial_steps,
+                  initial_text=initial_text,
+                  control_text=control_text,
+                  display_initial_text=display_initial_text,
+                  display_control_text=display_control_text,
+                  ylimit=y_ylimit,
+                  fontsize=fontsize,
+                  fig=fig)
 
     # Show the plot
     plt.show()
+
+def plot_data(
+    axis: Axes,
+    data: np.ndarray,
+    setpoint: float,
+    index: int,
+    var_symbol: str,
+    var_label: str,
+    initial_steps: Optional[int],
+    initial_text: str,
+    control_text: str,
+    display_initial_text: bool,
+    display_control_text: bool,
+    ylimit: Optional[List[Tuple[float, float]]],
+    fontsize: int,
+    fig: Figure
+) -> None:
+    """
+    Plot a data series with setpoints in a specified axis. Optionally,
+    highlight an initial measurement phase and a control phase using shaded
+    regions and text labels. The labels will be displayed if there is enough
+    space to prevent them from overlapping with other plot elements.
+
+    Args:
+        axis (Axes): The Matplotlib axis object to plot on.
+        data (np.ndarray): An array containing data to be plotted.
+        setpoint (float): The setpoint value for the data.
+        index (int): The index of the data used for labeling purposes (e.g.,
+            "u_1", "u_2").
+        var_symbol (str): The variable symbol used to label the data series
+            (e.g., "u" for inputs, "y" for outputs).
+        var_label (str): The variable label representing the control signal
+            (e.g., "Input", "Output").
+        initial_steps (Optional[int]): The number of initial time steps where
+            input-output measurements were taken for the data-driven
+            characterization of the system. This will highlight the initial
+            measurement period in the plot.
+        initial_text (str): Label text to display over the initial measurement
+            period of the plot.
+        control_text (str): Label text to display over the post-initial
+            control period.
+        display_initial_text (bool): Whether to display the `initial_text`
+            label on the plot.
+        display_control_text (bool): Whether to display the `control_text`
+            label on the plot.
+        ylimit (Optional[Tuple[float, float]]): A tuple specifying the Y-axis
+            limits for the plot.
+        fontsize (int): The fontsize for labels, legends and axes ticks.
+        fig (Figure): The Matplotlib figure object containing the axis.
+    """
+    T = data.shape[0] # Data length
+
+    # Plot data series
+    axis.plot(range(0, T), data, label=f'${var_symbol}_{index + 1}$')
+    # Plot setpoint
+    axis.plot(range(0, T), np.full(T, setpoint),
+              label=f'${var_symbol}_{index + 1}^s$')
+    
+    # Highlight initial input-output data measurement period if provided
+    if initial_steps:
+        # Highlight period with a grayed rectangle
+        axis.axvspan(0, initial_steps, color='gray', alpha=0.1)
+        # Add a vertical line at the right side of the rectangle
+        axis.axvline(x=initial_steps, color='black',
+                            linestyle=(0, (5, 5)), linewidth=1)
+        
+        # Display initial measurement text if enabled
+        if display_initial_text:
+            # Get y-axis limits
+            y_min, y_max = axis.get_ylim()
+            # Place label at the center of the highlighted area
+            u_init_text = axis.text(
+                initial_steps / 2, (y_min + y_max) / 2,
+                initial_text, fontsize=fontsize - 1,
+                ha='center', va='center', color='black',
+                bbox=dict(facecolor='white', edgecolor='black'))
+            # Get initial text bounding box width
+            init_text_width = get_text_width_in_data(
+                text_object=u_init_text, axis=axis, fig=fig)
+            # Hide text box if it overflows the plot area
+            if initial_steps < init_text_width:
+                u_init_text.set_visible(False)
+        
+        # Display Data-Driven MPC control text if enabled
+        if display_control_text:
+            # Get y-axis limits
+            y_min, y_max = axis.get_ylim()
+            # Place label at the center of the remaining area
+            u_control_text = axis.text(
+                (T + initial_steps) / 2, (y_min + y_max) / 2,
+                control_text, fontsize=fontsize - 1,
+                ha='center', va='center', color='black',
+                bbox=dict(facecolor='white', edgecolor='black'))
+            # Get control text bounding box width
+            control_text_width = get_text_width_in_data(
+                text_object=u_control_text, axis=axis, fig=fig)
+            # Hide text box if it overflows the plot area
+            if (T - initial_steps) < control_text_width:
+                u_control_text.set_visible(False)
+    
+    # Format labels, legend and ticks
+    axis.set_xlabel('Time step $k$', fontsize=fontsize)
+    axis.set_ylabel(f'{var_label} ${var_symbol}_{index + 1}$',
+                    fontsize=fontsize)
+    axis.legend(fontsize=fontsize)
+    axis.tick_params(axis='both', labelsize=fontsize)
+    
+    # Set x-limits
+    axis.set_xlim([0, T])
+
+    # Set y-limits if provided
+    if ylimit:
+        axis.set_ylim(ylimit)
 
 def plot_input_output_animation(
     u_k: np.ndarray,
@@ -272,7 +302,8 @@ def plot_input_output_animation(
     the data-driven system characterization phase in a Data-Driven MPC
     algorithm. Additionally, custom labels can be displayed to indicate the
     initial measurement and the subsequent MPC control periods, but only if
-    there is sufficient space to prevent them from overflowing the plots.
+    there is enough space to prevent them from overlapping with other plot
+    elements.
     
     Args:
         u_k (np.ndarray): An array containing control input data of shape (T,
@@ -340,97 +371,60 @@ def plot_input_output_animation(
     axs_y = subfigs[1].subplots(1, max(m, p))
 
     # Define input-output line lists
-    u_lines = []
-    y_lines = []
+    u_lines: List[Line2D] = []
+    y_lines: List[Line2D] = []
+
     # Define initial measurement rectangles and texts lists
-    u_rects = []
-    u_rect_lines = []
-    u_init_texts = []
-    u_control_texts = []
-    
-    y_rects = []
-    y_rect_lines = []
-    y_init_texts = []
-    y_control_texts = []
+    u_rects: List[Rectangle] = []
+    u_rect_lines: List[Line2D] = []
+    u_init_texts: List[Text] = []
+    u_control_texts: List[Text] = []
+    y_rects: List[Rectangle] = []
+    y_rect_lines: List[Line2D] = []
+    y_init_texts: List[Text] = []
+    y_control_texts: List[Text] = []
 
     # Define y-axis center
-    u_y_axis_centers = []
-    y_y_axis_centers = []
+    u_y_axis_centers: List[float] = []
+    y_y_axis_centers: List[float] = []
         
-    # Add labels, legends and define axis limits for plots
+    # Initialize input plot elements
     for i in range(m):
-        # Initialize lines for inputs
-        u_lines.append(axs_u[i].plot([], [], label=f'$u_{i+1}$')[0])
-        # Plot input setpoint
-        axs_u[i].plot(
-            range(0, T), np.full(T, u_s[i, :]), label=f'$u_{i+1}^s$')
-        # Set axis labels and legends
-        axs_u[i].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs_u[i].set_ylabel(f'Input $u_{i+1}$', fontsize=fontsize)
-        axs_u[i].legend(fontsize=fontsize)
-        axs_u[i].tick_params(axis='both', labelsize=fontsize)
-
-        # Define axis limits
-        u_lim_min, u_lim_max = get_padded_limits(u_k[:, i], u_s[i, :])
-        axs_u[i].set_xlim(0, T)
-        axs_u[i].set_ylim(u_lim_min, u_lim_max)
-        u_y_axis_centers.append((u_lim_min + u_lim_max) / 2)
-
-        if initial_steps:
-            # Initialize initial input rectangle
-            u_rects.append(axs_u[i].axvspan(0, 0, color='gray', alpha=0.1))
-            # Initialize initial input rectangle limit line
-            u_rect_lines.append(axs_u[i].axvline(
-                x=0, color='black', linestyle=(0, (5, 5)), linewidth=1))
-            # Initialize initial input text
-            u_init_texts.append(axs_u[i].text(
-                initial_steps / 2, u_y_axis_centers[i],
-                initial_text, fontsize=fontsize - 1, ha='center',
-                va='center', color='black', bbox=dict(facecolor='white',
-                                                      edgecolor='black')))
-            # Initialize control input text
-            u_control_texts.append(axs_u[i].text(
-                (T + initial_steps) / 2, u_y_axis_centers[i],
-                control_text, fontsize=fontsize - 1, ha='center',
-                va='center', color='black', bbox=dict(facecolor='white',
-                                                      edgecolor='black')))
-
+        initialize_data_animation(axis=axs_u[i],
+                                  data=u_k[:, i],
+                                  setpoint=u_s[i, :],
+                                  index=i,
+                                  var_symbol="u",
+                                  var_label="Input",
+                                  initial_steps=initial_steps,
+                                  initial_text=initial_text,
+                                  control_text=control_text,
+                                  fontsize=fontsize,
+                                  lines=u_lines,
+                                  rects=u_rects,
+                                  rect_lines=u_rect_lines,
+                                  init_texts=u_init_texts,
+                                  control_texts=u_control_texts,
+                                  y_axis_centers=u_y_axis_centers)
+    
+    # Initialize output plot elements
     for j in range(p):
-        # Initialize lines for outputs
-        y_lines.append(axs_y[j].plot([], [], label=f'$y_{j+1}$')[0])
-        # Plot output setpoint
-        axs_y[j].plot(
-            range(0, T), np.full(T, y_s[j, :]), label=f'$y_{j+1}^s$')
-        # Set axis labels and legends
-        axs_y[j].set_xlabel('Time step $k$', fontsize=fontsize)
-        axs_y[j].set_ylabel(f'Output $y_{j+1}$', fontsize=fontsize)
-        axs_y[j].legend(fontsize=fontsize, loc='lower right')
-        axs_y[j].tick_params(axis='both', labelsize=fontsize)
-
-        # Define axis limits
-        y_lim_min, y_lim_max = get_padded_limits(y_k[:, j], y_s[j, :])
-        axs_y[j].set_xlim(0, T)
-        axs_y[j].set_ylim(y_lim_min, y_lim_max)
-        y_y_axis_centers.append((y_lim_min + y_lim_max) / 2)
-
-        if initial_steps:
-            # Initialize initial output rectangle
-            y_rects.append(axs_y[j].axvspan(0, 0, color='gray', alpha=0.1))
-            # Initialize initial output rectangle limit line
-            y_rect_lines.append(axs_y[j].axvline(
-                x=0, color='black', linestyle=(0, (5, 5)), linewidth=1))
-            # Initialize initial output text
-            y_init_texts.append(axs_y[j].text(
-                initial_steps / 2, y_y_axis_centers[j],
-                initial_text, fontsize=fontsize - 1, ha='center',
-                va='center', color='black', bbox=dict(facecolor='white',
-                                                      edgecolor='black')))
-            # Initialize control output text
-            y_control_texts.append(axs_y[j].text(
-                (T + initial_steps) / 2, y_y_axis_centers[j],
-                control_text, fontsize=fontsize - 1, ha='center',
-                va='center', color='black', bbox=dict(facecolor='white',
-                                                      edgecolor='black')))
+        initialize_data_animation(axis=axs_y[j],
+                                  data=y_k[:, j],
+                                  setpoint=y_s[j, :],
+                                  index=j,
+                                  var_symbol="y",
+                                  var_label="Output",
+                                  initial_steps=initial_steps,
+                                  initial_text=initial_text,
+                                  control_text=control_text,
+                                  fontsize=fontsize,
+                                  lines=y_lines,
+                                  rects=y_rects,
+                                  rect_lines=y_rect_lines,
+                                  init_texts=y_init_texts,
+                                  control_texts=y_control_texts,
+                                  y_axis_centers=y_y_axis_centers)
     
     # Get initial text bounding box width
     init_text_width = get_text_width_in_data(
@@ -441,59 +435,227 @@ def plot_input_output_animation(
 
     # Animation update function
     def update(frame):
-        # Update input-output plot data
+        # Update input plot data
         for i in range(m):
-            u_lines[i].set_data(range(0, frame+1), u_k[:frame+1, i])
-
-            # Update initial measurements rectangle and text for input
-            if initial_steps and frame <= initial_steps:
-                # Update rectangle width
-                u_rects[i].set_width(frame)
-                # Hide initial measurement and Data-Driven MPC control texts
-                u_init_texts[i].set_visible(False)
-                u_control_texts[i].set_visible(False)
-                # Update rectangle limit line position
-                u_rect_lines[i].set_xdata([frame])
-                # Show initial measurement text
-                if display_initial_text and frame >= init_text_width:
-                    u_init_texts[i].set_position(
-                        (frame / 2, u_y_axis_centers[i]))
-                    u_init_texts[i].set_visible(True)
-                # Show Data-Driven MPC control text if possible
-                if display_control_text and frame == initial_steps:
-                    if (T - initial_steps) >= control_text_width:
-                        u_control_texts[i].set_visible(True)
-
+            update_data_animation(frame=frame,
+                                  data=u_k[:frame+1, i],
+                                  data_length=T,
+                                  initial_steps=initial_steps,
+                                  line=u_lines[i],
+                                  rect=u_rects[i],
+                                  y_axis_center=u_y_axis_centers[i],
+                                  rect_line=u_rect_lines[i],
+                                  init_text_obj=u_init_texts[i],
+                                  control_text_obj=u_control_texts[i],
+                                  display_initial_text=display_initial_text,
+                                  display_control_text=display_control_text,
+                                  init_text_width=init_text_width,
+                                  control_text_width=control_text_width)
+        
+        # Update output plot data
         for j in range(p):
-            y_lines[j].set_data(range(0, frame+1), y_k[:frame+1, j])
-
-            # Update initial measurements rectangle and text for output
-            if initial_steps and frame <= initial_steps:
-                # Update rectangle width
-                y_rects[j].set_width(frame)
-                # Hide initial measurement and Data-Driven MPC control texts
-                y_init_texts[j].set_visible(False)
-                y_control_texts[j].set_visible(False)
-                # Update rectangle limit line position
-                y_rect_lines[j].set_xdata([frame])
-                # Show initial measurement text
-                if display_initial_text and frame >= init_text_width:
-                    y_init_texts[j].set_position(
-                        (frame / 2, y_y_axis_centers[j]))
-                    y_init_texts[j].set_visible(True)
-                # Show Data-Driven MPC control text if possible
-                if display_control_text and frame == initial_steps:
-                    if (T - initial_steps) >= control_text_width:
-                        y_control_texts[j].set_visible(True)
+            update_data_animation(frame=frame,
+                                  data=y_k[:frame+1, j],
+                                  data_length=T,
+                                  initial_steps=initial_steps,
+                                  line=y_lines[j],
+                                  rect=y_rects[j],
+                                  y_axis_center=y_y_axis_centers[j],
+                                  rect_line=y_rect_lines[j],
+                                  init_text_obj=y_init_texts[j],
+                                  control_text_obj=y_control_texts[j],
+                                  display_initial_text=display_initial_text,
+                                  display_control_text=display_control_text,
+                                  init_text_width=init_text_width,
+                                  control_text_width=control_text_width)
 
         return (u_lines + y_lines + u_rects + u_rect_lines +
                 u_init_texts + u_control_texts + y_rects +
                 y_init_texts + y_control_texts + y_rect_lines)
 
     # Create animation
-    animation = FuncAnimation(fig, update, frames=T, interval=interval, blit=True)
+    animation = FuncAnimation(
+        fig, update, frames=T, interval=interval, blit=True)
 
     return animation
+
+def initialize_data_animation(
+    axis: Axes,
+    data: np.ndarray,
+    setpoint: float,
+    index: int,
+    var_symbol: str,
+    var_label: str,
+    initial_steps: Optional[int],
+    initial_text: str,
+    control_text: str,
+    fontsize: int,
+    lines: List[Line2D],
+    rects: List[Rectangle],
+    rect_lines: List[Line2D],
+    init_texts: List[Text],
+    control_texts: List[Text],
+    y_axis_centers: List[float]
+) -> None:
+    """
+    Initialize plot elements for a data series animation with setpoints.
+
+    This function initializes and appends several elements to the plot, such
+    as plot lines representing data, rectangles and lines representing an
+    initial input-output data measurement period, and text labels for both the
+    initial measurement and control periods. It also adjusts the axis limits
+    and stores the y-axis center values.
+
+    Args:
+        axis (Axes): The Matplotlib axis object to plot on.
+        data (np.ndarray): An array containing data to be plotted.
+        setpoint (float): The setpoint value for the data.
+        index (int): The index of the data used for labeling purposes (e.g.,
+            "u_1", "u_2").
+        var_symbol (str): The variable symbol used to label the data series
+            (e.g., "u" for inputs, "y" for outputs).
+        var_label (str): The variable label representing the control signal
+            (e.g., "Input", "Output").
+        initial_steps (Optional[int]): The number of initial time steps where
+            input-output measurements were taken for the data-driven
+            characterization of the system. This will highlight the initial
+            measurement period in the plot.
+        initial_text (str): Label text to display over the initial measurement
+            period of the plot.
+        control_text (str): Label text to display over the post-initial
+            control period.
+        fontsize (int): The fontsize for labels, legends and axes ticks.
+        lines (List[Line2D]): The list where the initialized plot lines will
+            be stored.
+        rects (List[Rectangle]): The list where the initialized rectangles
+            representing the initial measurement region will be stored.
+        rect_lines (List[Line2D]): The list where the initialized vertical
+            lines representing the initial measurement region limit will be
+            stored.
+        init_texts (List[Text]): The list where the initialized initial
+            measurement label texts will be stored.
+        control_texts (List[Text]): The list where the initialized control
+            label texts will be stored.
+        y_axis_centers (List[float]): The list where the y-axis center from
+            the adjusted axis will be stored.
+    
+    Note:
+        This function updates the `lines`, `rects`, `rect_lines`,
+        `init_texts`, and `control_texts` with the initialized plot elements.
+        It also adjusts the y-axis limits to a fixed range and stores the
+        center values in `y_axis_centers`.
+    """
+    T = data.shape[0] # Data length
+
+    # Initialize plot lines
+    lines.append(axis.plot([], [], label=f'${var_symbol}_{index + 1}$')[0])
+    # Plot setpoint
+    axis.plot(
+        range(0, T), np.full(T, setpoint), label=f'${var_symbol}_{index + 1}^s$')
+    # Format labels, legend and ticks
+    axis.set_xlabel('Time step $k$', fontsize=fontsize)
+    axis.set_ylabel(f'{var_label} ${var_symbol}_{index + 1}$', fontsize=fontsize)
+    axis.legend(fontsize=fontsize)
+    axis.tick_params(axis='both', labelsize=fontsize)
+
+    # Define axis limits
+    u_lim_min, u_lim_max = get_padded_limits(data, setpoint)
+    axis.set_xlim(0, T)
+    axis.set_ylim(u_lim_min, u_lim_max)
+    y_axis_centers.append((u_lim_min + u_lim_max) / 2)
+
+    if initial_steps:
+        # Initialize initial measurement rectangle
+        rects.append(axis.axvspan(0, 0, color='gray', alpha=0.1))
+        # Initialize initial measurement rectangle limit line
+        rect_lines.append(axis.axvline(
+            x=0, color='black', linestyle=(0, (5, 5)), linewidth=1))
+        # Initialize initial measurement text
+        init_texts.append(axis.text(
+            initial_steps / 2, y_axis_centers[index],
+            initial_text, fontsize=fontsize - 1, ha='center',
+            va='center', color='black', bbox=dict(facecolor='white',
+                                                    edgecolor='black')))
+        # Initialize control text
+        control_texts.append(axis.text(
+            (T + initial_steps) / 2, y_axis_centers[index],
+            control_text, fontsize=fontsize - 1, ha='center',
+            va='center', color='black', bbox=dict(facecolor='white',
+                                                    edgecolor='black')))
+
+def update_data_animation(
+    frame: int,
+    data: np.ndarray,
+    data_length: int,
+    initial_steps: Optional[int],
+    line: Line2D,
+    rect: Rectangle,
+    y_axis_center: float,
+    rect_line: Line2D,
+    init_text_obj: Text,
+    control_text_obj: Text,
+    display_initial_text: bool,
+    display_control_text: bool,
+    init_text_width: float,
+    control_text_width: float
+) -> None:
+    """
+    Update the plot elements in a data series animation with setpoints.
+
+    This function updates the data plot line for each animation frame.
+    If 'initial_steps' is provided, it also updates the rectangle and line
+    representing the initial input-output measurement period, as well as the
+    text labels indicating the initial measurement and control periods. These
+    labels will be displayed if there is enough space to prevent them from
+    overlapping with other plot elements.
+
+    Args:
+        frame (int): The current animation frame.
+        data (np.ndarray): An array containing data to be plotted.
+        data_length (int): The length of the `data` array.
+        initial_steps (Optional[int]): The number of initial time steps where
+            input-output measurements were taken for the data-driven
+            characterization of the system. This will highlight the initial
+            measurement period in the plot.
+        line (Line2D): The plot line corresponding to the data series plot.
+        rect (Rectangle): The rectangle representing the initial measurement
+            region.
+        y_axis_center (float): The y-axis center of the plot axis.
+        rect_line (Line2D): The line object representing the initial
+            measurement region limit.
+        init_text_obj (Text): The text object containing the initial
+            measurement period label.
+        control_text_obj (Text): The text object containing the control period
+            label.
+        display_initial_text (bool): Whether to display the `initial_text`
+            label on the plot.
+        display_control_text (bool): Whether to display the `control_text`
+            label on the plot.
+        init_text_width (float): The width of the `init_text_obj` object in
+            data coordinates.
+        control_text_width (float): The width of the `control_text_obj` object
+            in data coordinates.
+    """
+    # Update plot line data
+    line.set_data(range(0, frame+1), data[:frame+1])
+    
+    # Update initial measurement rectangle and texts
+    if initial_steps and frame <= initial_steps:
+        # Update rectangle width
+        rect.set_width(frame)
+        # Hide initial measurement and control texts
+        init_text_obj.set_visible(False)
+        control_text_obj.set_visible(False)
+        # Update rectangle limit line position
+        rect_line.set_xdata([frame])
+        # Show initial measurement text
+        if display_initial_text and frame >= init_text_width:
+            init_text_obj.set_position((frame / 2, y_axis_center))
+            init_text_obj.set_visible(True)
+        # Show control text if possible
+        if display_control_text and frame == initial_steps:
+            if (data_length - initial_steps) >= control_text_width:
+                control_text_obj.set_visible(True)
 
 def save_animation(
     animation: FuncAnimation,
