@@ -17,7 +17,8 @@ def plot_input_output(
     u_s: np.ndarray,
     y_s: np.ndarray,
     initial_steps: Optional[int] = None,
-    initial_text: str = "Init. Measurement",
+    initial_excitation_text: str = "Init. Excitation",
+    initial_measurement_text: str = "Init. Measurement",
     control_text: str = "Data-Driven MPC",
     display_initial_text: bool = True,
     display_control_text: bool = True,
@@ -58,8 +59,12 @@ def plot_input_output(
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
             measurement period in the plot.
-        initial_text (str): Label text to display over the initial measurement
-            period of the plot. Default is "Init. Measurement".
+        initial_excitation_text (str): Label text to display over the initial
+            excitation period of the input plots. Default is
+            "Init. Excitation".
+        initial_measurement_text (str): Label text to display over the initial
+            measurement period of the output plots. Default is
+            "Init. Measurement".
         control_text (str): Label text to display over the post-initial
             control period. Default is "Data-Driven MPC".
         display_initial_text (bool): Whether to display the `initial_text`
@@ -132,7 +137,7 @@ def plot_input_output(
                   var_symbol="u",
                   var_label="Input",
                   initial_steps=initial_steps,
-                  initial_text=initial_text,
+                  initial_text=initial_excitation_text,
                   control_text=control_text,
                   display_initial_text=display_initial_text,
                   display_control_text=display_control_text,
@@ -149,7 +154,7 @@ def plot_input_output(
                   var_symbol="y",
                   var_label="Output",
                   initial_steps=initial_steps,
-                  initial_text=initial_text,
+                  initial_text=initial_measurement_text,
                   control_text=control_text,
                   display_initial_text=display_initial_text,
                   display_control_text=display_control_text,
@@ -279,7 +284,8 @@ def plot_input_output_animation(
     u_s: np.ndarray,
     y_s: np.ndarray,
     initial_steps: Optional[int] = None,
-    initial_text: str = "Init. Measurement",
+    initial_excitation_text: str = "Init. Excitation",
+    initial_measurement_text: str = "Init. Measurement",
     control_text: str = "Data-Driven MPC",
     display_initial_text: bool = True,
     display_control_text: bool = True,
@@ -320,8 +326,12 @@ def plot_input_output_animation(
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
             measurement period in the plot.
-        initial_text (str): Label text to display over the initial measurement
-            period of the plot. Default is "Init. Measurement".
+        initial_excitation_text (str): Label text to display over the initial
+            excitation period of the input plots. Default is
+            "Init. Excitation".
+        initial_measurement_text (str): Label text to display over the initial
+            measurement period of the output plots. Default is
+            "Init. Measurement".
         control_text (str): Label text to display over the post-initial
             control period. Default is "Data-Driven MPC".
         display_initial_text (bool): Whether to display the `initial_text`
@@ -397,7 +407,7 @@ def plot_input_output_animation(
                                   var_symbol="u",
                                   var_label="Input",
                                   initial_steps=initial_steps,
-                                  initial_text=initial_text,
+                                  initial_text=initial_excitation_text,
                                   control_text=control_text,
                                   fontsize=fontsize,
                                   lines=u_lines,
@@ -416,7 +426,7 @@ def plot_input_output_animation(
                                   var_symbol="y",
                                   var_label="Output",
                                   initial_steps=initial_steps,
-                                  initial_text=initial_text,
+                                  initial_text=initial_measurement_text,
                                   control_text=control_text,
                                   fontsize=fontsize,
                                   lines=y_lines,
@@ -427,8 +437,14 @@ def plot_input_output_animation(
                                   y_axis_centers=y_y_axis_centers)
     
     # Get initial text bounding box width
-    init_text_width = get_text_width_in_data(
+    init_text_width_input = get_text_width_in_data(
         text_object=u_init_texts[0], axis=axs_u[0], fig=fig)
+    init_text_width_output = get_text_width_in_data(
+        text_object=y_init_texts[0], axis=axs_y[0], fig=fig)
+    # Calculate maximum text width between input and
+    # output labels to show them at the same time
+    init_text_width = max(init_text_width_input, init_text_width_output)
+    
     # Get control text bounding box width
     control_text_width = get_text_width_in_data(
         text_object=u_control_texts[0], axis=axs_u[0], fig=fig)
