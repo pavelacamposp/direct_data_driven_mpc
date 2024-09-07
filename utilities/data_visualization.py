@@ -415,7 +415,8 @@ def plot_input_output_animation(
                                   rect_lines=u_rect_lines,
                                   init_texts=u_init_texts,
                                   control_texts=u_control_texts,
-                                  y_axis_centers=u_y_axis_centers)
+                                  y_axis_centers=u_y_axis_centers,
+                                  legend_loc='upper right')
     
     # Initialize output plot elements
     for j in range(p):
@@ -434,7 +435,8 @@ def plot_input_output_animation(
                                   rect_lines=y_rect_lines,
                                   init_texts=y_init_texts,
                                   control_texts=y_control_texts,
-                                  y_axis_centers=y_y_axis_centers)
+                                  y_axis_centers=y_y_axis_centers,
+                                  legend_loc='lower right')
     
     # Get initial text bounding box width
     init_text_width_input = get_text_width_in_data(
@@ -511,7 +513,8 @@ def initialize_data_animation(
     rect_lines: List[Line2D],
     init_texts: List[Text],
     control_texts: List[Text],
-    y_axis_centers: List[float]
+    y_axis_centers: List[float],
+    legend_loc: str = 'best'
 ) -> None:
     """
     Initialize plot elements for a data series animation with setpoints.
@@ -554,6 +557,8 @@ def initialize_data_animation(
             label texts will be stored.
         y_axis_centers (List[float]): The list where the y-axis center from
             the adjusted axis will be stored.
+        legend_loc (str): The location of the legend on the plot. Corresponds
+            to Matplotlib's `loc` parameter for legends. Defaults to 'best'.
     
     Note:
         This function updates the `lines`, `rects`, `rect_lines`,
@@ -571,7 +576,7 @@ def initialize_data_animation(
     # Format labels, legend and ticks
     axis.set_xlabel('Time step $k$', fontsize=fontsize)
     axis.set_ylabel(f'{var_label} ${var_symbol}_{index + 1}$', fontsize=fontsize)
-    axis.legend(fontsize=fontsize)
+    axis.legend(fontsize=fontsize, loc=legend_loc)
     axis.tick_params(axis='both', labelsize=fontsize)
 
     # Define axis limits
