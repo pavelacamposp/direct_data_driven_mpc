@@ -30,12 +30,12 @@ def plot_input_output(
     """
     Plot input-output data with setpoints in a Matplotlib figure.
 
-    This function creates a 2 rows of subplots, with the first row containing
+    This function creates 2 rows of subplots, with the first row containing
     control inputs, and the second row, system outputs. Each subplot shows the
     data series for each data sequence alongside its setpoint as a constant
     line.
 
-    If provided, the first 'initial_steps' time steps can be highlighted to
+    If provided, the first 'initial_steps' time steps are highlighted to
     emphasize the initial input-output data measurement period representing
     the data-driven system characterization phase in a Data-Driven MPC
     algorithm. Additionally, custom labels can be displayed to indicate the
@@ -701,7 +701,7 @@ def get_padded_limits(
     pad_percentage: float = 0.05
 ) -> Tuple[float, float]:
     """
-    Get the minimun and maximum limits from two data sequences extended by
+    Get the minimum and maximum limits from two data sequences extended by
     a specified percentage of the combined data range.
 
     Args:
