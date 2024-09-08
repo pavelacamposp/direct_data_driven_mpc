@@ -1,0 +1,22 @@
+# Data-Driven MPC Parameters
+# Based on the Data-Driven MPC implemementation example in Section V for the
+# control of a four-tank system from the paper:
+# J. Berberich, J. Köhler, M. A. Müller and F. Allgöwer, "Data-Driven Model
+# Predictive Control With Stability and Robustness Guarantees," in IEEE
+# Transactions on Automatic Control, vol. 66, no. 4, pp. 1702-1717, April
+# 2021, doi: 10.1109/TAC.2020.3000182.
+
+data_driven_mpc_params:
+  N: 400  # Initial input-output trajectory length
+  u_d_range: [-1, 1]  # Range of the persistently exciting input u_d
+  epsilon_bar: 0.002  # Estimated upper bound of the system measurement noise
+  L: 30  # Prediction horizon
+  Q_scalar: 3  # Scalar multiplier for the output weighting matrix Q
+  R_scalar: 0.0001  # Scalar multiplier for the input weighting matrix R
+  lambda_sigma: 1000  # Regularization parameter for the slack variable
+  lambda_alpha_epsilon_bar: 0.1  # Regularization parameter for alpha (trajectory prediction)
+  slack_var_constraint_type: 0  # Slack variable constraint type: 0 for None, 1 for Convex, 2 for Non Convex
+  controller_type: 1  # Data-Driven MPC controller type: 0 for Nominal, 1 for Robust
+  n: 4  # Estimated system order
+  u_s: [1, 1]  # Control input setpoint
+  y_s: [0.65, 0.77]  # System output setpoint
