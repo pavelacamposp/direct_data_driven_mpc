@@ -1,0 +1,26 @@
+# Four-Tank System Parameters
+# Parameters of the linearized version of a four-tank system considered in
+# the implemementation example in Section V from the paper:
+# J. Berberich, J. Köhler, M. A. Müller and F. Allgöwer, "Data-Driven Model
+# Predictive Control With Stability and Robustness Guarantees," in IEEE
+# Transactions on Automatic Control, vol. 66, no. 4, pp. 1702-1717, April
+# 2021, doi: 10.1109/TAC.2020.3000182.
+
+FourTankSystem:
+  A:  # System state matrix
+    - [0.921, 0, 0.041, 0]
+    - [0, 0.918, 0, 0.033]
+    - [0, 0, 0.924, 0]
+    - [0, 0, 0, 0.937]
+  B:  # Input matrix
+    - [0.017, 0.001]
+    - [0.001, 0.023]
+    - [0, 0.061]
+    - [0.072, 0]
+  C:  # Output matrix
+    - [1, 0, 0, 0]
+    - [0, 1, 0, 0]
+  D:  # Feedforward matrix
+    - [0, 0]
+    - [0, 0]
+  eps_max: 0.002  # Upper bound of the system measurement noise
