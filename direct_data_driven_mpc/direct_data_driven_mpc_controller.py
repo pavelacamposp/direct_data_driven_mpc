@@ -111,7 +111,7 @@ class DirectDataDrivenMPCController():
         Initialize a Direct Data-Driven MPC with specified system model
         parameters, an initial input-output data trajectory measured from the
         system, Data-Driven MPC parameters, and a specified Data-Driven MPC
-        contoller type.
+        controller type.
 
         Note:
             The input data `u_d` used to excite the system to get the initial
@@ -162,7 +162,7 @@ class DirectDataDrivenMPCController():
 
         # Initial Input-Output trajectory data
         self.u_d = u_d # Input trajectory data
-        self.y_d = y_d # Ouput trajectory data
+        self.y_d = y_d # Output trajectory data
         self.N = u_d.shape[0] # Initial input-output trajectory length
 
         # Initialize storage variables for past `n` input-output measurements
@@ -841,7 +841,7 @@ class DirectDataDrivenMPCController():
             y_current (np.ndarray): The measured system output for the current
                 time step, expected to match the dimensions of prior outputs.
                 This output should correspond to the system's response to
-                `u_current`, since they represent a trajectory of such system.
+                `u_current`, as both represent a trajectory of the system.
     
         Raises:
             ValueError: If `u_current` or `y_current` do not match the
