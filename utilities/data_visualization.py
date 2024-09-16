@@ -24,8 +24,8 @@ def plot_input_output(
     display_control_text: bool = True,
     figsize: Tuple[int, int] = (12, 8),
     dpi: int = 300,
-    u_ylimit: Optional[List[Tuple[float, float]]] = None,
-    y_ylimit: Optional[List[Tuple[float, float]]] = None,
+    u_ylimits: Optional[List[Tuple[float, float]]] = None,
+    y_ylimits: Optional[List[Tuple[float, float]]] = None,
     fontsize: int = 12
 ) -> None:
     """
@@ -74,9 +74,9 @@ def plot_input_output(
         figsize (Tuple[int, int]): The (width, height) dimensions of the
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
-        u_ylimit (Optional[List[Tuple[float, float]]]): A list of tuples
+        u_ylimits (Optional[List[Tuple[float, float]]]): A list of tuples
             specifying the Y-axis limits for the input subplots.
-        y_ylimit (Optional[List[Tuple[float, float]]]): A list of tuples
+        y_ylimits (Optional[List[Tuple[float, float]]]): A list of tuples
             specifying the Y-axis limits for the output subplots.
         fontsize (int): The fontsize for labels, legends and axes ticks.
     
@@ -99,11 +99,11 @@ def plot_input_output(
     p = y_k.shape[1] # Number of outputs
 
     # Error handling for y-limit lengths
-    if u_ylimit and len(u_ylimit) != u_k.shape[1]:
-        raise ValueError(f"The length of `u_ylimit` ({len(u_ylimit)}) does "
+    if u_ylimits and len(u_ylimits) != u_k.shape[1]:
+        raise ValueError(f"The length of `u_ylimits` ({len(u_ylimits)}) does "
                          f"not match the number of input subplots ({m}).")
-    if y_ylimit and len(y_ylimit) != p:
-        raise ValueError(f"The length of `y_ylimit` ({len(y_ylimit)}) does "
+    if y_ylimits and len(y_ylimits) != p:
+        raise ValueError(f"The length of `y_ylimits` ({len(y_ylimits)}) does "
                          f"not match the number of output subplots ({p}).")
     
     # Create figure
@@ -130,6 +130,9 @@ def plot_input_output(
 
     # Plot input data
     for i in range(m):
+        # Get u_ylimit if provided
+        u_ylimit = u_ylimits[i] if u_ylimits else None
+        # Plot data
         plot_data(axis=axs_u[i],
                   data=u_k[:, i],
                   setpoint=u_s[i, :],
@@ -147,6 +150,9 @@ def plot_input_output(
 
     # Plot output data
     for j in range(p):
+        # Get y_ylimit if provided
+        y_ylimit = y_ylimits[j] if y_ylimits else None
+        # Plot data
         plot_data(axis=axs_y[j],
                   data=y_k[:, j],
                   setpoint=y_s[j, :],
@@ -177,7 +183,7 @@ def plot_data(
     control_text: str,
     display_initial_text: bool,
     display_control_text: bool,
-    ylimit: Optional[List[Tuple[float, float]]],
+    ylimit: Optional[Tuple[float, float]],
     fontsize: int,
     fig: Figure
 ) -> None:
