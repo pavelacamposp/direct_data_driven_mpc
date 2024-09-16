@@ -122,27 +122,9 @@ def plot_input_output(
     # Create figure if lists of Axes are not provided
     is_ext_fig = axs_u is not None and axs_y is not None # External figure
     if not is_ext_fig:
-        # Create figure
-        fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
-        
-        # Modify constrained layout padding
-        fig.set_constrained_layout_pads(
-            w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
-
-        # Create subfigures for input and output data plots
-        subfigs = fig.subfigures(2, 1)
-
-        # Add titles for input and output subfigures
-        subfigs[0].suptitle('Control Inputs',
-                            fontsize=fontsize + 2,
-                            fontweight='bold')
-        subfigs[1].suptitle('System Outputs',
-                            fontsize=fontsize + 2,
-                            fontweight='bold')
-
-        # Create subplots
-        axs_u = subfigs[0].subplots(1, max(m, p))
-        axs_y = subfigs[1].subplots(1, max(m, p))
+        # Create figure and subplots
+        fig, axs_u, axs_y = create_figure_subplots(
+            m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize)
     else:
         # Use figure from the provided axes
         fig = axs_u[0].figure
@@ -403,27 +385,9 @@ def plot_input_output_animation(
     p = y_k.shape[1] # Number of outputs
     T = u_k.shape[0] # Length of data
 
-    # Create figure
-    fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
-    
-    # Modify constrained layout padding
-    fig.set_constrained_layout_pads(
-        w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
-
-    # Create subfigures for input and output data plots
-    subfigs = fig.subfigures(2, 1)
-
-    # Add titles for input and output subfigures
-    subfigs[0].suptitle('Control Inputs',
-                        fontsize=fontsize + 2,
-                        fontweight='bold')
-    subfigs[1].suptitle('System Outputs',
-                        fontsize=fontsize + 2,
-                        fontweight='bold')
-    
-    # Create subplots
-    axs_u = subfigs[0].subplots(1, max(m, p))
-    axs_y = subfigs[1].subplots(1, max(m, p))
+    # Create figure and subplots
+    fig, axs_u, axs_y = create_figure_subplots(
+        m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize)
 
     # Define input-output line lists
     u_lines: List[Line2D] = []
@@ -841,3 +805,58 @@ def remove_legend_duplicates(axis: Axes, last_label: Optional[str] = None) -> No
 
     # Update the legend with the unique handles and labels
     axis.legend(by_label.values(), by_label.keys())
+
+def create_figure_subplots(
+    m: int,
+    p: int,
+    figsize: Tuple[int, int],
+    dpi: int,
+    fontsize: int
+) -> Tuple[Figure, List[Axes], List[Axes]]:
+    """
+    Create a Matplotlib figure with two rows of subplots: one for control
+    inputs and one for system outputs, and return the created figure and
+    axes.
+
+    Args:
+        m (int): The number of control inputs (subplots in the first row).
+        p (int): The number of system outputs (subplots in the second row).
+        figsize (Tuple[int, int]): The (width, height) dimensions of the
+            created Matplotlib figure.
+        dpi (int): The DPI resolution of the figure.
+        fontsize (int): The fontsize for suptitles.
+    
+    Returns:
+        Tuple: A tuple containing:
+            - Figure: The created Matplotlib figure.
+            - List[Axes]: A list of axes for control inputs subplots.
+            - List[Axes]: A list of axes for system outputs subplots.
+    """
+    # Create figure
+    fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
+    
+    # Modify constrained layout padding
+    fig.set_constrained_layout_pads(
+        w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
+
+    # Create subfigures for input and output data plots
+    subfigs = fig.subfigures(2, 1)
+
+    # Add titles for input and output subfigures
+    subfigs[0].suptitle('Control Inputs',
+                        fontsize=fontsize + 2,
+                        fontweight='bold')
+    subfigs[1].suptitle('System Outputs',
+                        fontsize=fontsize + 2,
+                        fontweight='bold')
+    
+    # Create subplots
+    axs_u = subfigs[0].subplots(1, max(m, p))
+    axs_y = subfigs[1].subplots(1, max(m, p))
+
+    # Ensure axs_u and axs_y are always lists
+    if max(m, p) == 1:
+        axs_u = [axs_u]
+        axs_y = [axs_y]
+
+    return fig, axs_u, axs_y
