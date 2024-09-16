@@ -26,7 +26,10 @@ def plot_input_output(
     dpi: int = 300,
     u_ylimits: Optional[List[Tuple[float, float]]] = None,
     y_ylimits: Optional[List[Tuple[float, float]]] = None,
-    fontsize: int = 12
+    fontsize: int = 12,
+    data_label: str = "",
+    axs_u: Optional[List[Axes]] = None,
+    axs_y: Optional[List[Axes]] = None
 ) -> None:
     """
     Plot input-output data with setpoints in a Matplotlib figure.
@@ -43,6 +46,13 @@ def plot_input_output(
     initial measurement and the subsequent MPC control periods, but only if
     there is enough space to prevent them from overlapping with other plot
     elements.
+
+    Note:
+        If `axs_u` and `axs_y` are provided, the data will be plotted on these
+        external axes and no new figure will be created. This allows for
+        multiple data sequences to be plotted on the same external figure.
+        Each data sequence can be differentiated  using the `data_label`
+        argument.
 
     Args:
         u_k (np.ndarray): An array containing control input data of shape (T,
@@ -79,6 +89,9 @@ def plot_input_output(
         y_ylimits (Optional[List[Tuple[float, float]]]): A list of tuples
             specifying the Y-axis limits for the output subplots.
         fontsize (int): The fontsize for labels, legends and axes ticks.
+        data_label (str): The label for the current data sequences.
+        axs_u (Optional[List[Axes]]): List of external axes for input plots.
+        axs_y (Optional[List[Axes]]): List of external axes for output plots.
     
     Raises:
         ValueError: If any array dimensions mismatch expected shapes or if the
@@ -106,27 +119,33 @@ def plot_input_output(
         raise ValueError(f"The length of `y_ylimits` ({len(y_ylimits)}) does "
                          f"not match the number of output subplots ({p}).")
     
-    # Create figure
-    fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
-    
-    # Modify constrained layout padding
-    fig.set_constrained_layout_pads(
-        w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
+    # Create figure if lists of Axes are not provided
+    is_ext_fig = axs_u is not None and axs_y is not None # External figure
+    if not is_ext_fig:
+        # Create figure
+        fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
+        
+        # Modify constrained layout padding
+        fig.set_constrained_layout_pads(
+            w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
 
-    # Create subfigures for input and output data plots
-    subfigs = fig.subfigures(2, 1)
+        # Create subfigures for input and output data plots
+        subfigs = fig.subfigures(2, 1)
 
-    # Add titles for input and output subfigures
-    subfigs[0].suptitle('Control Inputs',
-                        fontsize=fontsize + 2,
-                        fontweight='bold')
-    subfigs[1].suptitle('System Outputs',
-                        fontsize=fontsize + 2,
-                        fontweight='bold')
+        # Add titles for input and output subfigures
+        subfigs[0].suptitle('Control Inputs',
+                            fontsize=fontsize + 2,
+                            fontweight='bold')
+        subfigs[1].suptitle('System Outputs',
+                            fontsize=fontsize + 2,
+                            fontweight='bold')
 
-    # Create subplots
-    axs_u = subfigs[0].subplots(1, max(m, p))
-    axs_y = subfigs[1].subplots(1, max(m, p))
+        # Create subplots
+        axs_u = subfigs[0].subplots(1, max(m, p))
+        axs_y = subfigs[1].subplots(1, max(m, p))
+    else:
+        # Use figure from the provided axes
+        fig = axs_u[0].figure
 
     # Plot input data
     for i in range(m):
@@ -139,6 +158,7 @@ def plot_input_output(
                   index=i,
                   var_symbol="u",
                   var_label="Input",
+                  data_label=data_label,
                   initial_steps=initial_steps,
                   initial_text=initial_excitation_text,
                   control_text=control_text,
@@ -147,6 +167,12 @@ def plot_input_output(
                   ylimit=u_ylimit,
                   fontsize=fontsize,
                   fig=fig)
+        
+        # Remove duplicate labels from legend
+        # if figure was created externally
+        if is_ext_fig:
+            remove_legend_duplicates(
+                axis=axs_u[i], last_label=f'$u_{i + 1}^s$')
 
     # Plot output data
     for j in range(p):
@@ -159,6 +185,7 @@ def plot_input_output(
                   index=j,
                   var_symbol="y",
                   var_label="Output",
+                  data_label=data_label,
                   initial_steps=initial_steps,
                   initial_text=initial_measurement_text,
                   control_text=control_text,
@@ -167,9 +194,16 @@ def plot_input_output(
                   ylimit=y_ylimit,
                   fontsize=fontsize,
                   fig=fig)
-
-    # Show the plot
-    plt.show()
+        
+        # Remove duplicate labels from legend
+        # if figure was created externally
+        if is_ext_fig:
+            remove_legend_duplicates(
+                axis=axs_y[j], last_label=f'$y_{j + 1}^s$')
+            
+    # Show the plot if the figure was created internally
+    if not is_ext_fig:
+        plt.show()
 
 def plot_data(
     axis: Axes,
@@ -178,6 +212,7 @@ def plot_data(
     index: int,
     var_symbol: str,
     var_label: str,
+    data_label: str,
     initial_steps: Optional[int],
     initial_text: str,
     control_text: str,
@@ -203,6 +238,7 @@ def plot_data(
             (e.g., "u" for inputs, "y" for outputs).
         var_label (str): The variable label representing the control signal
             (e.g., "Input", "Output").
+        data_label (str): The label for the current data sequence.
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
@@ -223,9 +259,12 @@ def plot_data(
     T = data.shape[0] # Data length
 
     # Plot data series
-    axis.plot(range(0, T), data, label=f'${var_symbol}_{index + 1}$')
+    axis.plot(range(0, T),
+              data,
+              label=f'${var_symbol}_{index + 1}${data_label}')
     # Plot setpoint
-    axis.plot(range(0, T), np.full(T, setpoint),
+    axis.plot(range(0, T),
+              np.full(T, setpoint),
               label=f'${var_symbol}_{index + 1}^s$')
     
     # Highlight initial input-output data measurement period if provided
@@ -780,3 +819,25 @@ def get_text_width_in_data(
     text_box_width = text_box_data[1][0] - text_box_data[0][0]
     
     return text_box_width
+
+def remove_legend_duplicates(axis: Axes, last_label: Optional[str] = None) -> None:
+    """
+    Remove duplicate entries from the legend of a Matplotlib axis. Optionally,
+    move a specified label to the end of the legend.
+
+    Args:
+        axis (Axes): The Matplotlib axis containing the legend to modify.
+        last_label (Optional[str]): The label that should appear last in the
+            legend. If not provided, no specific label is moved to the end.
+    """
+    # Get labels and handles from axis without duplicates
+    handles, labels = axis.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+
+    # If a last_label is provided and exists, move it to the end
+    if last_label and last_label in by_label:
+        last_handle = by_label.pop(last_label)
+        by_label[last_label] = last_handle
+
+    # Update the legend with the unique handles and labels
+    axis.legend(by_label.values(), by_label.keys())
