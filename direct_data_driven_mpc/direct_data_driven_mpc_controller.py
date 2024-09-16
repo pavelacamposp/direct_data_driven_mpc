@@ -53,6 +53,9 @@ class DirectDataDrivenMPCController():
             the slack variable `sigma` in a Robust MPC formulation.
         slack_var_constraint_type (SlackVarConstraintTypes): The constraint
             type for the slack variable `sigma` in a Robust MPC formulation.
+        use_terminal_constraint (bool): If True, include terminal equality
+            constraints in the Data-Driven MPC formulation. If False, the
+            controller will not enforce this constraint.
         HLn_ud (np.ndarray): The Hankel matrix constructed from the input data
             `u_d`.
         HLn_yd (np.ndarray): The Hankel matrix constructed from the output
@@ -106,6 +109,7 @@ class DirectDataDrivenMPCController():
         slack_var_constraint_type: SlackVarConstraintTypes = (
             SlackVarConstraintTypes.CONVEX),
         controller_type: DataDrivenMPCType = DataDrivenMPCType.NOMINAL,
+        use_terminal_constraint: bool = True
     ):
         """
         Initialize a Direct Data-Driven MPC with specified system model
@@ -144,6 +148,9 @@ class DirectDataDrivenMPCController():
                 formulation.
             controller_type (DataDrivenMPCType): The Data-Driven MPC
                 controller type.
+            use_terminal_constraint (bool): If True, include terminal equality
+                constraints in the Data-Driven MPC formulation. If False, the
+                controller will not enforce this constraint.
         """
         # Set controller type
         self.controller_type = controller_type # Nominal or Robust Controller
@@ -207,7 +214,10 @@ class DirectDataDrivenMPCController():
                 raise ValueError("All robust MPC parameters (eps_max, "
                                  "lamb_alpha, lamb_sigma, c) must be "
                                  "provided for a 'ROBUST' controller.")
-            
+
+        # Terminal constraint use in Data-Driven MPC formulation
+        self.use_terminal_constraint = use_terminal_constraint
+
         # Evaluate if input trajectory data is persistently exciting of
         # order (L + 2 * n)
         self.evaluate_input_persistent_excitation()
@@ -466,8 +476,10 @@ class DirectDataDrivenMPCController():
         self.dynamics_constraint = self.define_system_dynamic_constraint()
         self.internal_state_constraint = (
             self.define_internal_state_constraint())
-        self.terminal_constraint = self.define_terminal_state_constraint(
-            u_s=self.u_s, y_s=self.y_s)
+        self.terminal_constraint = (
+            self.define_terminal_state_constraint(u_s=self.u_s, y_s=self.y_s)
+            if self.use_terminal_constraint
+            else [])
         
         # Define Slack Variable Constraint if controller type is Robust
         self.slack_var_constraint = (
