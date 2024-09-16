@@ -874,8 +874,8 @@ class DirectDataDrivenMPCController():
         
     def set_past_input_output_data(
         self,
-        new_u_past: np.ndarray,
-        new_y_past: np.ndarray,
+        u_past: np.ndarray,
+        y_past: np.ndarray,
     ) -> None:
         """
         Set the storage variables for past input-output measurements.
@@ -886,16 +886,16 @@ class DirectDataDrivenMPCController():
         the MPC problem formulation.
 
         Args:
-            new_u_past (np.ndarray): An array containing past control inputs.
+            u_past (np.ndarray): An array containing past control inputs.
                 Expected to have a shape of (n * m, 1), where 'n' is the
                 estimated system order and 'm' is the dimension of the input.
-            new_y_past (np.ndarray): An array containing past measured system
+            y_past (np.ndarray): An array containing past measured system
                 outputs. Expected to have a shape of (n * p, 1) where 'n' is
                 the estimated system order and 'p' is the dimension of the
                 output.
         
         Raises:
-            ValueError: If `new_u_past` or `new_y_past` do not have correct
+            ValueError: If `u_past` or `y_past` do not have correct
                 dimensions.
 
         Note:
@@ -905,39 +905,39 @@ class DirectDataDrivenMPCController():
         # Validate input types and dimensions
         expected_u_dim = (self.n * self.m, 1)
         expected_y_dim = (self.n * self.p, 1)
-        if new_u_past.shape != expected_u_dim:
+        if u_past.shape != expected_u_dim:
             raise ValueError(
-                f"Incorrect dimensions. new_u_past must be shaped as "
-                f"{expected_u_dim}. Got {new_u_past.shape}. instead")
-        if new_y_past.shape != expected_y_dim:
+                f"Incorrect dimensions. u_past must be shaped as "
+                f"{expected_u_dim}. Got {u_past.shape}. instead")
+        if y_past.shape != expected_y_dim:
             raise ValueError(
-                f"Incorrect dimensions. new_y_past must be shaped as "
-                f"{expected_y_dim}. Got {new_y_past.shape} instead.")
+                f"Incorrect dimensions. y_past must be shaped as "
+                f"{expected_y_dim}. Got {y_past.shape} instead.")
 
         # Update past input-output data
         # u[t-n, t-1]
-        self.u_past = new_u_past
+        self.u_past = u_past
         # y[t-n, t-1]
-        self.y_past = new_y_past
+        self.y_past = y_past
     
     def set_input_output_setpoints(
         self,
-        new_u_s: np.ndarray,
-        new_y_s: np.ndarray
+        u_s: np.ndarray,
+        y_s: np.ndarray
     ) -> None:
         """
         Set the control and system setpoints of the Data-Driven MPC controller.
 
         This method updates the control and system setpoints, `u_s` and `y_s`
-        to the provided values `new_u_s` and `new_y_s`. Then, it reinitializes
-        the controller to redefine the Data-Driven MPC formulation.
+        to their provided values. Then, it reinitializes the controller to
+        redefine the Data-Driven MPC formulation.
 
         Args:
-            new_u_s (np.ndarray): The setpoint for control inputs.
-            new_y_s (np.ndarray): The setpoint for system outputs.
+            u_s (np.ndarray): The setpoint for control inputs.
+            y_s (np.ndarray): The setpoint for system outputs.
         
         Raises:
-            ValueError: If `new_u_s` or `new_y_s` do not have the expected
+            ValueError: If `u_s` or `y_s` do not have the expected
                 dimensions.
             
         Note:
@@ -945,16 +945,16 @@ class DirectDataDrivenMPCController():
             the provided new setpoints.
         """
         # Validate input types and dimensions
-        if new_u_s.shape != self.u_s.shape:
+        if u_s.shape != self.u_s.shape:
             raise ValueError(f"Incorrect dimensions. u_s must have shape "
-                             f"{self.u_s.shape}, got {new_u_s.shape}")
-        if new_y_s.shape != self.y_s.shape:  # Replace with actual expected shape
+                             f"{self.u_s.shape}, got {u_s.shape}")
+        if y_s.shape != self.y_s.shape:  # Replace with actual expected shape
             raise ValueError(f"Incorrect dimensions. y_s must have shape "
-                             f"{self.y_s.shape}, got {new_y_s.shape}")
+                             f"{self.y_s.shape}, got {y_s.shape}")
     
         # Update Input-Output setpoint pairs
-        self.u_s = new_u_s
-        self.y_s = new_y_s
+        self.u_s = u_s
+        self.y_s = y_s
 
         # Reinitialize Data-Driven MPC controller
         self.initialize_data_driven_mpc()
