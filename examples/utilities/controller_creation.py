@@ -164,7 +164,8 @@ def get_data_driven_mpc_controller_params(
 def create_data_driven_mpc_controller(
     controller_config: DataDrivenMPCParamsDictType,
     u_d: np.ndarray,
-    y_d: np.ndarray
+    y_d: np.ndarray,
+    use_terminal_constraint: bool = True
 ) -> DirectDataDrivenMPCController:
     """
     Create a `DirectDataDrivenMPCController` instance using a specified
@@ -181,6 +182,9 @@ def create_data_driven_mpc_controller(
         y_d (np.ndarray): An array of shape `(N, p)` representing the system's
             output response to `u_d`. `N` is the trajectory length and `p` is
             the number of system outputs.
+        use_terminal_constraint (bool): If True, include terminal equality
+            constraints in the Data-Driven MPC formulation. If False, the
+            controller will not enforce this constraint. Defaults to True.
     
     Returns:
         DirectDataDrivenMPCController: A `DirectDataDrivenMPCController`
@@ -232,7 +236,8 @@ def create_data_driven_mpc_controller(
         lamb_sigma=lamb_sigma,
         c=c,
         slack_var_constraint_type=slack_var_constraint_type,
-        controller_type=controller_type)
+        controller_type=controller_type,
+        use_terminal_constraint=use_terminal_constraint)
     
     return direct_data_driven_mpc_controller
 
