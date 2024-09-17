@@ -207,7 +207,7 @@ def simulate_data_driven_mpc_control_loop(
         data_driven_mpc_controller.update_and_solve_data_driven_mpc()
 
         # Simulate closed loop
-        for k in range(t, min(t + n_mpc_step, t_sim - 1)):
+        for k in range(t, min(t + n_mpc_step, t_sim)):
             # --- Algorithm 1: ---
             # 2) Apply the input ut = ubar*[0](t).
             # --- Algorithm 2 (n-step): ---

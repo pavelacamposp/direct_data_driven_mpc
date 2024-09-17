@@ -209,7 +209,6 @@ def main() -> None:
 
     # --- Define Control Simulation parameters ---
     T = t_sim # Closed-loop horizon (simulation length)
-    T += 1 # Add an additional step to calculate the last control input
 
     # Create a Random Number Generator for reproducibility
     np_random = np.random.default_rng(seed=seed)
@@ -263,12 +262,6 @@ def main() -> None:
         t_sim=T,
         np_random=np_random,
         verbose=verbose)
-        
-    # Remove last step from simulation data (added previously
-    # only to calculate the last control input)
-    u_sys = u_sys[0:-1] # Remove the last control input
-    y_sys = y_sys[0:-1] # Remove the last system output
-    T -= 1 # Restore T to the original simulation length
 
     # =====================================================
     # 6. Plot and Animate Control System Inputs and Outputs
