@@ -219,6 +219,10 @@ def create_data_driven_mpc_controller(
     # Data-Driven MPC controller type
     controller_type = controller_config['controller_type']
 
+    # n-Step Data-Driven MPC Scheme parameters
+    # Number of consecutive applications of the optimal input
+    n_mpc_step = controller_config['n_mpc_step']
+
     # Create Data-Driven MPC controller
     direct_data_driven_mpc_controller = DirectDataDrivenMPCController(
         n=n,
@@ -237,6 +241,7 @@ def create_data_driven_mpc_controller(
         c=c,
         slack_var_constraint_type=slack_var_constraint_type,
         controller_type=controller_type,
+        n_mpc_step=n_mpc_step,
         use_terminal_constraint=use_terminal_constraint)
     
     return direct_data_driven_mpc_controller

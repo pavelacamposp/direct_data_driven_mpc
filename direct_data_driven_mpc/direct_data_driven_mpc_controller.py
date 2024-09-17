@@ -53,6 +53,8 @@ class DirectDataDrivenMPCController():
             the slack variable `sigma` in a Robust MPC formulation.
         slack_var_constraint_type (SlackVarConstraintTypes): The constraint
             type for the slack variable `sigma` in a Robust MPC formulation.
+        n_mpc_step (int): The number of consecutive applications of the
+            optimal input for an n-Step Data-Driven MPC Scheme (multi-step).
         use_terminal_constraint (bool): If True, include terminal equality
             constraints in the Data-Driven MPC formulation. If False, the
             controller will not enforce this constraint.
@@ -109,6 +111,7 @@ class DirectDataDrivenMPCController():
         slack_var_constraint_type: SlackVarConstraintTypes = (
             SlackVarConstraintTypes.CONVEX),
         controller_type: DataDrivenMPCType = DataDrivenMPCType.NOMINAL,
+        n_mpc_step: int = 1,
         use_terminal_constraint: bool = True
     ):
         """
@@ -148,6 +151,9 @@ class DirectDataDrivenMPCController():
                 formulation.
             controller_type (DataDrivenMPCType): The Data-Driven MPC
                 controller type.
+            n_mpc_step (int): The number of consecutive applications of the
+                optimal input for an n-Step Data-Driven MPC Scheme
+                (multi-step). Defaults to 1.
             use_terminal_constraint (bool): If True, include terminal equality
                 constraints in the Data-Driven MPC formulation. If False, the
                 controller will not enforce this constraint.
@@ -214,6 +220,10 @@ class DirectDataDrivenMPCController():
                 raise ValueError("All robust MPC parameters (eps_max, "
                                  "lamb_alpha, lamb_sigma, c) must be "
                                  "provided for a 'ROBUST' controller.")
+        
+        # n-Step Data-Driven MPC Scheme parameters
+        self.n_mpc_step = n_mpc_step # Number of consecutive applications
+        # of the optimal input
 
         # Terminal constraint use in Data-Driven MPC formulation
         self.use_terminal_constraint = use_terminal_constraint
