@@ -135,7 +135,6 @@ def generate_initial_input_output_data(
 
 def simulate_data_driven_mpc_control_loop(
     system_model: LTIModel,
-    controller_config: DataDrivenMPCParamsDictType,
     data_driven_mpc_controller: DirectDataDrivenMPCController,
     t_sim: int,
     np_random: Generator,
@@ -152,11 +151,6 @@ def simulate_data_driven_mpc_control_loop(
     Args:
         system_model (LTIModel): An `LTIModel` instance representing a Linear
             Time-Invariant (LTI) system.
-        controller_config (DataDrivenMPCParamsDictType): A dictionary
-            containing Data-Driven MPC controller parameters, including the
-            system output setpoint (`y_s`) and the number of consecutive
-            applications of the optimal input for an n-Step Data-Driven MPC
-            Scheme (`n_mpc_step`).
         data_driven_mpc_controller (DirectDataDrivenMPCController): A
             `DirectDataDrivenMPCController` instance representing a
             Data-Driven MPC controller.
@@ -187,10 +181,11 @@ def simulate_data_driven_mpc_control_loop(
     # measurement noise (simulation)
 
     # Retrieve Data-Driven MPC controller parameters
-    y_s = controller_config['y_s'] # System output setpoint
+    # System output setpoint
+    y_s = data_driven_mpc_controller.y_s
     # Number of consecutive applications of the optimal input
     # for an n-Step Data-Driven MPC Scheme (multi-step)
-    n_mpc_step = controller_config['n_mpc_step']
+    n_mpc_step = data_driven_mpc_controller.n_mpc_step
 
     # Initialize control loop input-output data arrays
     u_sys = np.zeros((t_sim, m))
