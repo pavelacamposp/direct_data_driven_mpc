@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Any
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from matplotlib.text import Text
@@ -16,6 +16,9 @@ def plot_input_output(
     y_k: np.ndarray,
     u_s: np.ndarray,
     y_s: np.ndarray,
+    inputs_line_params: dict[str, Any] = {},
+    outputs_line_params: dict[str, Any] = {},
+    setpoints_line_params: dict[str, Any] = {},
     initial_steps: Optional[int] = None,
     initial_excitation_text: str = "Init. Excitation",
     initial_measurement_text: str = "Init. Measurement",
@@ -37,7 +40,9 @@ def plot_input_output(
     This function creates 2 rows of subplots, with the first row containing
     control inputs, and the second row, system outputs. Each subplot shows the
     data series for each data sequence alongside its setpoint as a constant
-    line.
+    line. The appearance of plot lines can be customized by passing
+    dictionaries of Matplotlib line properties like color, linestyle, and
+    linewidth.
 
     If provided, the first 'initial_steps' time steps are highlighted to
     emphasize the initial input-output data measurement period representing
@@ -65,6 +70,15 @@ def plot_input_output(
             setpoint values.
         y_s (np.ndarray): An array of shape (p, 1) containing `p` output
             setpoint values.
+        inputs_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the lines used to plot the input data
+            series (e.g., color, linestyle, linewidth).
+        outputs_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the lines used to plot the output data
+            series (e.g., color, linestyle, linewidth).
+        setpoints_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the lines used to plot the setpoint
+            values (e.g., color, linestyle, linewidth).
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
@@ -138,6 +152,8 @@ def plot_input_output(
                   data=u_k[:, i],
                   setpoint=u_s[i, :],
                   index=i,
+                  data_line_params=inputs_line_params,
+                  setpoint_line_params=setpoints_line_params,
                   var_symbol="u",
                   var_label="Input",
                   data_label=data_label,
@@ -165,6 +181,8 @@ def plot_input_output(
                   data=y_k[:, j],
                   setpoint=y_s[j, :],
                   index=j,
+                  data_line_params=outputs_line_params,
+                  setpoint_line_params=setpoints_line_params,
                   var_symbol="y",
                   var_label="Output",
                   data_label=data_label,
@@ -192,6 +210,8 @@ def plot_data(
     data: np.ndarray,
     setpoint: float,
     index: int,
+    data_line_params: dict[str, Any],
+    setpoint_line_params: dict[str, Any],
     var_symbol: str,
     var_label: str,
     data_label: str,
@@ -210,12 +230,22 @@ def plot_data(
     regions and text labels. The labels will be displayed if there is enough
     space to prevent them from overlapping with other plot elements.
 
+    Note:
+        The appearance of plot lines can be customized by passing dictionaries
+        of Matplotlib line properties like color, linestyle, and linewidth.
+
     Args:
         axis (Axes): The Matplotlib axis object to plot on.
         data (np.ndarray): An array containing data to be plotted.
         setpoint (float): The setpoint value for the data.
         index (int): The index of the data used for labeling purposes (e.g.,
             "u_1", "u_2").
+        data_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the line used to plot the data series
+            (e.g., color, linestyle, linewidth).
+        setpoint_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the line used to plot the setpoint
+            value (e.g., color, linestyle, linewidth).
         var_symbol (str): The variable symbol used to label the data series
             (e.g., "u" for inputs, "y" for outputs).
         var_label (str): The variable label representing the control signal
@@ -243,10 +273,12 @@ def plot_data(
     # Plot data series
     axis.plot(range(0, T),
               data,
+              **data_line_params,
               label=f'${var_symbol}_{index + 1}${data_label}')
     # Plot setpoint
     axis.plot(range(0, T),
               np.full(T, setpoint),
+              **setpoint_line_params,
               label=f'${var_symbol}_{index + 1}^s$')
     
     # Highlight initial input-output data measurement period if provided
@@ -310,6 +342,9 @@ def plot_input_output_animation(
     y_k: np.ndarray,
     u_s: np.ndarray,
     y_s: np.ndarray,
+    inputs_line_params: dict[str, Any] = {},
+    outputs_line_params: dict[str, Any] = {},
+    setpoints_line_params: dict[str, Any] = {},
     initial_steps: Optional[int] = None,
     initial_excitation_text: str = "Init. Excitation",
     initial_measurement_text: str = "Init. Measurement",
@@ -328,7 +363,9 @@ def plot_input_output_animation(
     This function generates a figure with two rows of subplots: the top
     subplots display control inputs and the bottom subplots display system
     outputs. Each subplot shows the data series for each sequence alongside
-    its setpoint as a constant line.
+    its setpoint as a constant line. The appearance of plot lines can be
+    customized by passing dictionaries of Matplotlib line properties like
+    color, linestyle, and linewidth.
 
     If provided, the first 'initial_steps' time steps can be highlighted to
     emphasize the initial input-output data measurement period representing
@@ -349,6 +386,15 @@ def plot_input_output_animation(
             setpoint values.
         y_s (np.ndarray): An array of shape (p, 1) containing `p` output
             setpoint values.
+        inputs_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the lines used to plot the input data
+            series (e.g., color, linestyle, linewidth).
+        outputs_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the lines used to plot the output data
+            series (e.g., color, linestyle, linewidth).
+        setpoints_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the lines used to plot the setpoint
+            values (e.g., color, linestyle, linewidth).
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
@@ -413,6 +459,8 @@ def plot_input_output_animation(
                                   data=u_k[:, i],
                                   setpoint=u_s[i, :],
                                   index=i,
+                                  data_line_params=inputs_line_params,
+                                  setpoint_line_params=setpoints_line_params,
                                   var_symbol="u",
                                   var_label="Input",
                                   initial_steps=initial_steps,
@@ -433,6 +481,8 @@ def plot_input_output_animation(
                                   data=y_k[:, j],
                                   setpoint=y_s[j, :],
                                   index=j,
+                                  data_line_params=outputs_line_params,
+                                  setpoint_line_params=setpoints_line_params,
                                   var_symbol="y",
                                   var_label="Output",
                                   initial_steps=initial_steps,
@@ -511,6 +561,8 @@ def initialize_data_animation(
     data: np.ndarray,
     setpoint: float,
     index: int,
+    data_line_params: dict[str, Any],
+    setpoint_line_params: dict[str, Any],
     var_symbol: str,
     var_label: str,
     initial_steps: Optional[int],
@@ -532,7 +584,9 @@ def initialize_data_animation(
     as plot lines representing data, rectangles and lines representing an
     initial input-output data measurement period, and text labels for both the
     initial measurement and control periods. It also adjusts the axis limits
-    and stores the y-axis center values.
+    and stores the y-axis center values. The appearance of plot lines can be
+    customized by passing dictionaries of Matplotlib line properties like
+    color, linestyle, and linewidth.
 
     Args:
         axis (Axes): The Matplotlib axis object to plot on.
@@ -540,6 +594,12 @@ def initialize_data_animation(
         setpoint (float): The setpoint value for the data.
         index (int): The index of the data used for labeling purposes (e.g.,
             "u_1", "u_2").
+        data_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the line used to plot the data series
+            (e.g., color, linestyle, linewidth).
+        setpoint_line_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the line used to plot the setpoint
+            value (e.g., color, linestyle, linewidth).
         var_symbol (str): The variable symbol used to label the data series
             (e.g., "u" for inputs, "y" for outputs).
         var_label (str): The variable label representing the control signal
@@ -578,10 +638,13 @@ def initialize_data_animation(
     T = data.shape[0] # Data length
 
     # Initialize plot lines
-    lines.append(axis.plot([], [], label=f'${var_symbol}_{index + 1}$')[0])
+    lines.append(axis.plot([], [],
+                           **data_line_params,
+                           label=f'${var_symbol}_{index + 1}$')[0])
     # Plot setpoint
-    axis.plot(
-        range(0, T), np.full(T, setpoint), label=f'${var_symbol}_{index + 1}^s$')
+    axis.plot(range(0, T), np.full(T, setpoint),
+              **setpoint_line_params,
+              label=f'${var_symbol}_{index + 1}^s$')
     # Format labels, legend and ticks
     axis.set_xlabel('Time step $k$', fontsize=fontsize)
     axis.set_ylabel(f'{var_label} ${var_symbol}_{index + 1}$', fontsize=fontsize)
