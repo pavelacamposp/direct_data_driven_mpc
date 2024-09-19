@@ -331,7 +331,7 @@ def plot_data(
     axis.tick_params(axis='both', labelsize=fontsize)
     
     # Set x-limits
-    axis.set_xlim([0, T])
+    axis.set_xlim([0, T - 1])
 
     # Set y-limits if provided
     if ylimit:
@@ -653,7 +653,7 @@ def initialize_data_animation(
 
     # Define axis limits
     u_lim_min, u_lim_max = get_padded_limits(data, setpoint)
-    axis.set_xlim(0, T)
+    axis.set_xlim([0, T - 1])
     axis.set_ylim(u_lim_min, u_lim_max)
     y_axis_centers.append((u_lim_min + u_lim_max) / 2)
 
