@@ -208,7 +208,7 @@ def main() -> None:
     dd_mpc_config['y_s'] = y_s
 
     # --- Define Control Simulation parameters ---
-    T = t_sim # Closed-loop horizon (simulation length)
+    T = t_sim + 1 # Number of simulation steps
 
     # Create a Random Number Generator for reproducibility
     np_random = np.random.default_rng(seed=seed)
