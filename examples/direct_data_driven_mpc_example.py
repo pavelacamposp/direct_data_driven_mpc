@@ -1,25 +1,25 @@
 """
 Direct Data-Driven Model Predictive Control (MPC) Example Script
 
-This script demonstrates the setup, simulation, and visualization of a Direct 
+This script demonstrates the setup, simulation, and visualization of a Direct
 Data-Driven MPC controller applied to a four-tank system model based on
-research by J. Berberich et al., as described in [1]. The implementation uses
-the parameters of the system model, the initial input-output data generation
-and the Data-Driven MPC controller, as defined in the example presented in 
-Section V of [1].
+research by J. Berberich et al. [1]. The implementation follows the parameters
+defined in the example presented in Section V of [1], including those for the
+system model, the initial input-output data generation, and the Data-Driven
+MPC controller setup.
 
 To illustrate a typical controller operation, this script does not set the
-initial output state of the system to `y_0 = [0.4, 0.4]`, as shown in the
+initial output of the system to `y_0 = [0.4, 0.4]`, as shown in the
 closed-loop output graphs from Fig. 2 in [1]. Instead, the initial system
-state is estimated with a randomized input sequence.
+state is estimated using a randomized input sequence.
 
 Additionally, the input-output equilibrium pair `u_s = [[1], [1]]`,
 `y_s = [[0.65], [0.77]]` defined in the example from the paper is not an exact
-trajectory point of the four-tank system model, since the equilibrium output
-corresponding to `u_s` is `y_s = [[0.6444], [0.7526]]`. This does not
+trajectory point of the four-tank system model. The equilibrium output
+corresponding to `u_s` is actually `y_s = [[0.6444], [0.7526]]`. This does not
 represent an issue for the Robust Data-Driven MPC controller due to the
 addition of the slack variable that relaxes the system dynamics constraint.
-However, for the Nominal Data-Driven MPC, this difference leads to unfeasible
+However, for the Nominal Data-Driven MPC, this difference leads to infeasible
 solutions.
 
 To provide a unified script for illustrating the functionality of both Nominal
@@ -28,8 +28,8 @@ equilibrium pair `u_s = [[1], [1]]`, `y_s = [[0.64440373], [0.75261324]]`,
 calculating `y_s` from `u_s` using the system model matrices.
 
 For a closer approximation of the results presented in the paper using only
-Robust Data-Driven MPC controllers, considering the initial output state of
-the system `y_0 = [0.4, 0.4]`, and the defined input-output equilibrium pair
+Robust Data-Driven MPC controllers, considering the initial output of the
+system `y_0 = [0.4, 0.4]`, and the defined input-output equilibrium pair
 `u_s = [[1], [1]]`, `y_s = [[0.65], [0.77]]`, as presented in the paper
 example from [1], please refer to 'robust_data_driven_mpc_reproduction.py'.
 
@@ -199,7 +199,7 @@ def main() -> None:
             slack_var_constraint_type_mapping[slack_var_const_type_arg])
 
     # Calculate the system output equilibrium setpoint from `u_s` to avoid
-    # unfeasible solutions in the Nominal Data-Driven MPC Controller (see
+    # infeasible solutions in the Nominal Data-Driven MPC Controller (see
     # module docstring for details).
     u_s = dd_mpc_config['u_s']
     y_s = system_model.get_output_equilibrium_from_input(u_s=u_s)
