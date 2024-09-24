@@ -2,8 +2,8 @@ import numpy as np
 
 from utilities.initial_state_estimation import (
     observability_matrix, toeplitz_input_output_matrix,
-    estimate_initial_state, calculate_output_equilibrium_setpoint,
-    calculate_input_equilibrium_setpoint)
+    estimate_initial_state, calculate_equilibrium_output_from_input,
+    calculate_equilibrium_input_from_output)
 
 class LTIModel:
     """
@@ -158,51 +158,57 @@ class LTIModel:
         
         return x_0
     
-    def get_output_equilibrium_from_input(
+    def get_equilibrium_output_from_input(
         self,
-        u_s: np.ndarray
+        u_eq: np.ndarray
     ) -> np.ndarray:
         """
-        Calculate the output setpoint `y_s` corresponding to the input
-        setpoint `u_s` so they represent an equilibrium pair of the system.
+        Calculate the equilibrium output `y_eq` corresponding to an input
+        `u_eq` so they represent an equilibrium pair of the system.
+
+        This method calculates the equilibrium output under zero initial
+        conditions using the final value theorem.
 
         Args:
-            u_s (np.ndarray): A vector of shape `(m, 1)` representing the
-                input setpoint of the system, where `m` is the number of
-                inputs to the system.
+            u_eq (np.ndarray): A vector of shape `(m, 1)` representing an
+                input of the system, where `m` is the number of inputs to the
+                system.
 
         Returns:
-            np.ndarray: A vector of shape `(p, 1)` representing the output
-                equilibrium setpoint `y_s`, where `p` is the number of outputs
+            np.ndarray: A vector of shape `(p, 1)` representing the
+                equilibrium output `y_eq`, where `p` is the number of outputs
                 of the system.
         """
-        y_s = calculate_output_equilibrium_setpoint(
-            A=self.A, B=self.B, C=self.C, D=self.D, u_s=u_s)
+        y_eq = calculate_equilibrium_output_from_input(
+            A=self.A, B=self.B, C=self.C, D=self.D, u_eq=u_eq)
         
-        return y_s
+        return y_eq
     
-    def get_input_equilibrium_from_output(
+    def get_equilibrium_input_from_output(
         self,
-        y_s: np.ndarray
+        y_eq: np.ndarray
     ) -> np.ndarray:
         """
-        Calculate the input setpoint `u_s` corresponding to the output
-        setpoint `y_s` so they represent an equilibrium pair of the system.
+        Calculate the equilibrium input `u_eq` corresponding to an output
+        `y_eq` so they represent an equilibrium pair of the system.
+
+        This method calculates the equilibrium input under zero initial
+        conditions using the final value theorem.
 
         Args:
-            y_s (np.ndarray): A vector of shape `(p, 1)` representing the
-                output setpoint of the system, where `p` is the number of
-                outputs of the system.
+            y_eq (np.ndarray): A vector of shape `(p, 1)` representing an
+                output of the system, where `p` is the number of outputs of
+                the system.
 
         Returns:
-            np.ndarray: A vector of shape `(m, 1)` representing the input
-                equilibrium setpoint `u_s`, where `m` is the number of inputs
-                to the system.
+            np.ndarray: A vector of shape `(m, 1)` representing the
+                equilibrium input `u_s`, where `m` is the number of inputs to
+                the system.
         """
-        u_s = calculate_input_equilibrium_setpoint(
-            A=self.A, B=self.B, C=self.C, D=self.D, y_s=y_s)
+        u_eq = calculate_equilibrium_input_from_output(
+            A=self.A, B=self.B, C=self.C, D=self.D, y_eq=y_eq)
         
-        return u_s
+        return u_eq
     
     def get_system_order(self) -> int:
         """

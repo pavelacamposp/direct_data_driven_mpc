@@ -198,13 +198,13 @@ def main() -> None:
         dd_mpc_config['slack_var_constraint_type'] = (
             slack_var_constraint_type_mapping[slack_var_const_type_arg])
 
-    # Calculate the system output equilibrium setpoint from `u_s` to avoid
-    # infeasible solutions in the Nominal Data-Driven MPC Controller (see
-    # module docstring for details).
+    # Calculate the system equilibrium output setpoint `y_s` from the input
+    # setpoint `u_s` to avoid infeasible solutions in the Nominal Data-Driven
+    # MPC Controller (see module docstring for details).
     u_s = dd_mpc_config['u_s']
-    y_s = system_model.get_output_equilibrium_from_input(u_s=u_s)
+    y_s = system_model.get_equilibrium_output_from_input(u_eq=u_s)
 
-    # Override the system output equilibrium for the controller
+    # Override the output setpoint for the controller
     dd_mpc_config['y_s'] = y_s
 
     # --- Define Control Simulation parameters ---

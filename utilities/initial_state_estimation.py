@@ -10,8 +10,8 @@ def observability_matrix(A: np.ndarray, C: np.ndarray) -> np.ndarray:
     the `A` matrix.
 
     Args:
-        A (np.ndarray): The State matrix of the system.
-        C (np.ndarray): The Output matrix of the system.
+        A (np.ndarray): The state matrix of the system.
+        C (np.ndarray): The output matrix of the system.
     
     Returns:
         np.ndarray: The observability matrix of the system.
@@ -44,10 +44,10 @@ def toeplitz_input_output_matrix(
           [CAB CB  D]]
     
     Args:
-        A (np.ndarray): The State matrix of the system.
-        B (np.ndarray): The Input matrix of the system.
-        C (np.ndarray): The Output matrix of the system.
-        D (np.ndarray): The Feedforward matrix of the system.
+        A (np.ndarray): The state matrix of the system.
+        B (np.ndarray): The input matrix of the system.
+        C (np.ndarray): The output matrix of the system.
+        D (np.ndarray): The feedforward matrix of the system.
         t (int): The number of time steps for the Toeplitz matrix extension.
     
     Returns:
@@ -132,66 +132,74 @@ def estimate_initial_state(
 
     return initial_x
 
-def calculate_output_equilibrium_setpoint(
+def calculate_equilibrium_output_from_input(
     A: np.ndarray,
     B: np.ndarray,
     C: np.ndarray,
     D: np.ndarray,
-    u_s: np.ndarray
+    u_eq: np.ndarray
 ) -> np.ndarray:
     """
-    Calculate the output setpoint `y_s` corresponding to the input setpoint
-    `u_s` so they represent an equilibrium pair of the system defined by
-    matrices `A` (state), `B` (input), `C` (output) and `D` (feedforward).
+    Calculate the equilibrium output `y_eq` corresponding to an input `u_eq`
+    so they represent an equilibrium pair of the system defined by matrices
+    `A` (state), `B` (input), `C` (output) and `D` (feedforward).
+
+    This function assumes a Linear Time-Invariant (LTI) system and that the
+    equilibrium is calculated under zero initial conditions using the final
+    value theorem.
 
     Args:
-        A (np.ndarray): The State matrix of the system.
-        B (np.ndarray): The Input matrix of the system.
-        C (np.ndarray): The Output matrix of the system.
-        D (np.ndarray): The Feedforward matrix of the system.
-        u_s (np.ndarray): An input setpoint array of the system.
+        A (np.ndarray): The state matrix of the system.
+        B (np.ndarray): The input matrix of the system.
+        C (np.ndarray): The output matrix of the system.
+        D (np.ndarray): The feedforward matrix of the system.
+        u_eq (np.ndarray): An input vector of the system.
 
     Returns:
-        np.ndarray: The output equilibrium setpoint `y_s` corresponding to the
-            input setpoint `u_s`.
+        np.ndarray: The equilibrium output `y_eq` corresponding to the input
+            `u_eq`.
     """
     n = A.shape[0] # Order of the system
 
     # Calculate equilibrium output using the final value theorem,
     # assuming zero initial conditions
     M = C @ np.linalg.inv(np.eye(n) - A) @ B + D
-    y_s = M @ u_s
+    y_eq = M @ u_eq
 
-    return y_s
+    return y_eq
 
-def calculate_input_equilibrium_setpoint(
+def calculate_equilibrium_input_from_output(
     A: np.ndarray,
     B: np.ndarray,
     C: np.ndarray,
     D: np.ndarray,
-    y_s: np.ndarray
+    y_eq: np.ndarray
 ) -> np.ndarray:
     """
-    Calculate the input setpoint `u_s` corresponding to the output setpoint
-    `y_s` so they represent an equilibrium pair of the system defined by
-    matrices `A` (state), `B` (input), `C` (output) and `D` (feedforward).
+    Calculate the equilibrium input `u_eq` corresponding to an output `y_eq`
+    so they represent an equilibrium pair of the system defined by matrices
+    `A` (state), `B` (input), `C` (output) and `D` (feedforward).
+
+    This function assumes a Linear Time-Invariant (LTI) system and that the
+    equilibrium is calculated under zero initial conditions using the final
+    value theorem.
 
     Args:
-        A (np.ndarray): The State matrix of the system.
-        B (np.ndarray): The Input matrix of the system.
-        C (np.ndarray): The Output matrix of the system.
-        D (np.ndarray): The Feedforward matrix of the system.
-        y_s (np.ndarray): An output setpoint array of the system.
+        A (np.ndarray): The state matrix of the system.
+        B (np.ndarray): The input matrix of the system.
+        C (np.ndarray): The output matrix of the system.
+        D (np.ndarray): The feedforward matrix of the system.
+        y_s (np.ndarray): An output vector of the system.
 
     Returns:
-        np.ndarray: The input equilibrium setpoint `u_s` corresponding to the
-            output setpoint `y_s`.
+        np.ndarray: The equilibrium input `u_eq` corresponding to the output
+            `y_eq`.
     """
     n = A.shape[0] # Order of the system
 
     # Calculate equilibrium input using the final value theorem,
     # assuming zero initial conditions
     M = C @ np.linalg.inv(np.eye(n) - A) @ B + D
-    u_s = np.linalg.pinv(M) @ y_s
+    u_eq = np.linalg.pinv(M) @ y_eq
 
-    return u_s
+    return u_eq
