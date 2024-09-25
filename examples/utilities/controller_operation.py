@@ -133,6 +133,70 @@ def generate_initial_input_output_data(
 
     return u_d, y_d
 
+def simulate_n_input_output_measurements(
+    system_model: LTIModel,
+    controller_config: DataDrivenMPCParamsDictType,
+    np_random: Generator
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simulate a control input setpoint applied to a system over `n` (the
+    estimated system order) time steps and return the resulting input-output
+    data sequences.
+
+    This function retrieves the control input setpoint (`u_s`) and the
+    estimated system order (`n`) from a Data-Driven MPC controller
+    configuration. Then, it simulates the system using a constant input `u_s`
+    and random output noise over `n` time steps. The resulting input-output
+    trajectory can be used to update the past `n` input-output measurements
+    of a previously initialized Data-Driven MPC controller, allowing it to
+    operate on a system with a different state.
+    
+    Note:
+        This function is used for scenarios where a Data-Driven MPC controller
+        has been initialized but needs to be adjusted to match different
+        system states.
+
+    Args:
+        system_model (LTIModel): An `LTIModel` instance representing a Linear
+            Time-Invariant (LTI) system.
+        controller_config (DataDrivenMPCParamsDictType): A dictionary
+            containing Data-Driven MPC controller configuration parameters,
+            including the estimated system order (`n`) and the control input
+            setpoint (`u_s`).
+        np_random (Generator): A Numpy random number generator for generating
+            random noise for the system's output.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: A tuple containing two arrays:
+            - An array of shape `(n, m)` representing the constant input
+                setpoint applied to the system over `n` time steps, where `n`
+                is the system order and `m` is the number of control inputs.
+            - An array of shape `(n, p)` representing the output response of
+                the system, where `n` is the system order and `p` is the
+                number of system outputs.
+    """
+    # Retrieve model parameters
+    m = system_model.get_number_inputs() # Number of inputs
+    p = system_model.get_number_outputs() # Number of outputs
+    eps_max_sim = system_model.get_eps_max() # Upper bound of the system
+    # measurement noise
+
+    # Retrieve Data-Driven MPC controller parameters
+    n = controller_config['n'] # Estimated system order
+    u_s = controller_config['u_s'] # Control input setpoint
+
+    # Construct input array from controller's input setpoint
+    U_n = np.tile(u_s, (n, 1)).reshape(n, m)
+
+    # Generate bounded uniformly distributed additive measurement noise
+    W_n = eps_max_sim * np_random.uniform(-1.0, 1.0, (n, p))
+    
+    # Simulate the system with the constant input and generated
+    # noise sequences
+    Y_n = system_model.simulate(U=U_n, W=W_n, steps=n)
+    
+    return U_n, Y_n
+
 def simulate_data_driven_mpc_control_loop(
     system_model: LTIModel,
     data_driven_mpc_controller: DirectDataDrivenMPCController,
