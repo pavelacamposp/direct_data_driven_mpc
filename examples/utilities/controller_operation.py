@@ -200,7 +200,7 @@ def simulate_n_input_output_measurements(
 def simulate_data_driven_mpc_control_loop(
     system_model: LTIModel,
     data_driven_mpc_controller: DirectDataDrivenMPCController,
-    t_sim: int,
+    n_steps: int,
     np_random: Generator,
     verbose: int
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -218,17 +218,17 @@ def simulate_data_driven_mpc_control_loop(
         data_driven_mpc_controller (DirectDataDrivenMPCController): A
             `DirectDataDrivenMPCController` instance representing a
             Data-Driven MPC controller.
-        t_sim (int): The number of time steps for the simulation.
+        n_steps (int): The number of time steps for the simulation.
         np_random (Generator): A Numpy random number generator for generating
             random noise for the system's output.
         verbose (int): The verbosity level.
     
     Returns:
         Tuple[np.ndarray, np.ndarray]: A tuple containing two arrays:
-            - An array of shape `(t_sim, m)` representing the optimal control
+            - An array of shape `(n_steps, m)` representing the optimal control
                 inputs applied to the system, where `m` is the number of
                 control inputs.
-            - An array of shape `(t_sim, p)` representing the output response
+            - An array of shape `(n_steps, p)` representing the output response
                 of the system, where `p` is the number of system outputs.
 
     References:
@@ -252,17 +252,17 @@ def simulate_data_driven_mpc_control_loop(
     n_mpc_step = data_driven_mpc_controller.n_mpc_step
 
     # Initialize control loop input-output data arrays
-    u_sys = np.zeros((t_sim, m))
-    y_sys = np.zeros((t_sim, p))
+    u_sys = np.zeros((n_steps, m))
+    y_sys = np.zeros((n_steps, p))
 
     # Generate bounded uniformly distributed additive measurement noise
-    w_sys = eps_max_sim * np_random.uniform(-1.0, 1.0, (t_sim, p))
+    w_sys = eps_max_sim * np_random.uniform(-1.0, 1.0, (n_steps, p))
 
     # --- Simulate Data-Driven MPC control system ---
     # Simulate the Data-Driven MPC control system following Algorithm 1 for a
     # Data-Driven MPC Scheme, and Algorithm 2 for an n-Step Data-Driven MPC
     # Scheme, as described in [1].
-    for t in range(0, t_sim, n_mpc_step):
+    for t in range(0, n_steps, n_mpc_step):
         # --- Algorithm 1 and Algorithm 2 (n-step): ---
         # 1) Solve Data-Driven MPC after taking past `n` input-output
         #    measurements u[t-n, t-1], y[t-n, t-1].
@@ -271,7 +271,7 @@ def simulate_data_driven_mpc_control_loop(
         data_driven_mpc_controller.update_and_solve_data_driven_mpc()
 
         # Simulate closed loop
-        for k in range(t, min(t + n_mpc_step, t_sim)):
+        for k in range(t, min(t + n_mpc_step, n_steps)):
             # --- Algorithm 1: ---
             # 2) Apply the input ut = ubar*[0](t).
             # --- Algorithm 2 (n-step): ---

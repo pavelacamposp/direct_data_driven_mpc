@@ -206,7 +206,7 @@ def create_data_driven_mpc_controllers_reproduction(
 def simulate_data_driven_mpc_control_loops_reproduction(
     system_model: LTIModel,
     data_driven_mpc_controllers: List[DirectDataDrivenMPCController],
-    t_sim : int,
+    n_steps: int,
     np_random: Generator,
     verbose: int,
 ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
@@ -226,17 +226,17 @@ def simulate_data_driven_mpc_control_loops_reproduction(
         data_driven_mpc_controllers (List[DirectDataDrivenMPCController]): A
             list of `DirectDataDrivenMPCController` instances representing the
             Data-Driven MPC controllers to be simulated.
-        t_sim (int): The number of time steps for the simulation.
+        n_steps (int): The number of time steps for the simulation.
         np_random (Generator): A Numpy random number generator for generating
             random noise for the system's output.
         verbose (int): The verbosity level.
     
     Returns:
         Tuple[List[np.ndarray], List[np.ndarray]]: A tuple containing:
-            - A list of arrays, each of shape `(t_sim, m)`, representing the
+            - A list of arrays, each of shape `(n_steps, m)`, representing the
                 optimal control inputs applied to the system for each
                 controller, where `m` is the number of control inputs.
-            - A list of arrays, each of shape `(t_sim, p)`, representing the
+            - A list of arrays, each of shape `(n_steps, p)`, representing the
                 output response of the system for each controller, where `p`
                 is the number of system outputs.
     """
@@ -261,7 +261,7 @@ def simulate_data_driven_mpc_control_loops_reproduction(
         u_sys, y_sys = simulate_data_driven_mpc_control_loop(
             system_model=system_model,
             data_driven_mpc_controller=controller,
-            t_sim=t_sim,
+            n_steps=n_steps,
             np_random=np_random,
             verbose=verbose)
     

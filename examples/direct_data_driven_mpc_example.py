@@ -259,7 +259,7 @@ def main() -> None:
     u_sys, y_sys = simulate_data_driven_mpc_control_loop(
         system_model=system_model,
         data_driven_mpc_controller=dd_mpc_controller,
-        t_sim=T,
+        n_steps=T,
         np_random=np_random,
         verbose=verbose)
 

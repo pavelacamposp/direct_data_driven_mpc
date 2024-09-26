@@ -201,7 +201,7 @@ def main() -> None:
         simulate_data_driven_mpc_control_loops_reproduction(
             system_model=system_model,
             data_driven_mpc_controllers=dd_mpc_controllers,
-            t_sim=T - n,
+            n_steps=T - n,
             np_random=np_random,
             verbose=verbose))
     
