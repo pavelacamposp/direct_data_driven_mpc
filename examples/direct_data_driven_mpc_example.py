@@ -208,7 +208,7 @@ def main() -> None:
     dd_mpc_config['y_s'] = y_s
 
     # --- Define Control Simulation parameters ---
-    T = t_sim + 1 # Number of simulation steps
+    n_steps = t_sim + 1 # Number of simulation steps
 
     # Create a Random Number Generator for reproducibility
     np_random = np.random.default_rng(seed=seed)
@@ -259,7 +259,7 @@ def main() -> None:
     u_sys, y_sys = simulate_data_driven_mpc_control_loop(
         system_model=system_model,
         data_driven_mpc_controller=dd_mpc_controller,
-        n_steps=T,
+        n_steps=n_steps,
         np_random=np_random,
         verbose=verbose)
 
@@ -321,7 +321,7 @@ def main() -> None:
         
         # Save input-output animation as an MP4 video
         save_animation(animation=ani,
-                       total_frames=N + T,
+                       total_frames=N + n_steps,
                        fps=video_fps,
                        bitrate=video_bitrate,
                        file_path=video_path)

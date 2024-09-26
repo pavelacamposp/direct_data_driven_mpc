@@ -98,7 +98,7 @@ def main() -> None:
     dd_mpc_config = get_data_driven_mpc_controller_params(m=m, p=p)
 
     # --- Define Control Simulation parameters ---
-    T = t_sim + 1 # Number of simulation steps
+    n_steps = t_sim + 1 # Number of simulation steps
 
     # Create a Random Number Generator for reproducibility
     np_random = np.random.default_rng(seed=seed)
@@ -201,7 +201,7 @@ def main() -> None:
         simulate_data_driven_mpc_control_loops_reproduction(
             system_model=system_model,
             data_driven_mpc_controllers=dd_mpc_controllers,
-            n_steps=T - n,
+            n_steps=n_steps - n,
             np_random=np_random,
             verbose=verbose))
     
