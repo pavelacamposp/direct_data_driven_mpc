@@ -36,7 +36,8 @@ class LTIModel:
         D: np.ndarray,
         eps_max: float = 0.0):
         """
-        Initialize a LTI system with state-space matrices `A`, `B`, `C`, `D`.
+        Initialize a Linear Time-Invariant (LTI) system with state-space
+        matrices `A`, `B`, `C`, `D`.
 
         Args:
             A (np.ndarray): The State matrix of the system.
@@ -51,7 +52,7 @@ class LTIModel:
         self.C = C
         self.D = D
         self.eps_max = eps_max
-        # System order and number of inputs and outputs
+        # System order, number of inputs, and number of outputs
         self.n = A.shape[0] # System order
         self.m = B.shape[1] # Number of inputs
         self.p = C.shape[0] # Number of outputs
@@ -276,7 +277,7 @@ class LTIModel:
         # Update system state
         self.x = state
 
-    def set_eps_max(self, eps_max) -> None:
+    def set_eps_max(self, eps_max: float) -> None:
         """
         Set the upper bound of the system measurement noise.
 
