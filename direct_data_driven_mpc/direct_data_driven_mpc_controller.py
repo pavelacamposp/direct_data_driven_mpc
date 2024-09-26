@@ -663,11 +663,11 @@ class DirectDataDrivenMPCController():
         slack_variable_constraint = []
         if (self.slack_var_constraint_type ==
             SlackVarConstraintTypes.NON_CONVEX):
-            # Define slack variable constraint considering
-            # a NON-CONVEX constraint based on Equation 6d [1]
-            slack_variable_constraint = [
-                cp.norm(sigma_pred, "inf") <=
-                self.eps_max * (1 + cp.norm(self.alpha, 1))]
+            # Raise NotImplementedError for NON-CONVEX constraint
+            raise NotImplementedError(
+                "Robust Data-Driven MPC with a Non-Convex slack variable "
+                "constraint is not currently implemented, since it cannot "
+                "be efficiently solved.")
         elif self.slack_var_constraint_type == SlackVarConstraintTypes.CONVEX:
             # Define slack variable constraint considering
             # a CONVEX constraint based on Remark 3 [1]
