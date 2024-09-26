@@ -28,6 +28,7 @@ import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 from examples.utilities.controller_creation import (
     get_data_driven_mpc_controller_params)
@@ -40,7 +41,19 @@ from examples.utilities.paper_reproduction import (
     simulate_data_driven_mpc_control_loops_reproduction,
     plot_input_output_reproduction)
 
-from models.four_tank_system import FourTankSystem
+from utilities.model_simulation import LTISystemModel
+
+# Directory paths
+dirname = os.path.dirname
+project_dir = dirname(dirname(__file__))
+examples_dir = os.path.join(project_dir, 'examples')
+models_config_dir = os.path.join(examples_dir, 'models', 'config')
+
+# Model configuration file
+model_config_file = 'four_tank_system_params.yaml'
+model_config_path = os.path.join(models_config_dir,
+                                 model_config_file)
+model_key_value = 'FourTankSystem'
 
 # Simulation parameters
 default_t_sim = 600 # Default simulation length in time steps
@@ -89,7 +102,9 @@ def main() -> None:
     # 1. Define Simulation and Controller Parameters
     # ==============================================
     # --- Define system model (simulation) ---
-    system_model = FourTankSystem(verbose=verbose)
+    system_model = LTISystemModel(config_file=model_config_path,
+                                  model_key_value=model_key_value,
+                                  verbose=verbose)
 
     # --- Define Data-Driven MPC Controller Parameters ---
     # Load Data-Driven MPC controller parameters from configuration file

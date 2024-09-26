@@ -58,16 +58,24 @@ from utilities.data_visualization import (
 from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
     DataDrivenMPCType, SlackVarConstraintTypes)
 
-from models.four_tank_system import FourTankSystem
+from utilities.model_simulation import LTISystemModel
 
 # Directory paths
 dirname = os.path.dirname
-project_directory = dirname(dirname(__file__))
-default_animation_dir = os.path.join(project_directory, 'animation_outputs')
+project_dir = dirname(dirname(__file__))
+examples_dir = os.path.join(project_dir, 'examples')
+models_config_dir = os.path.join(examples_dir, 'models', 'config')
+default_animation_dir = os.path.join(project_dir, 'animation_outputs')
+
+# Model configuration file
+default_model_config_file = 'four_tank_system_params.yaml'
+default_model_config_path = os.path.join(models_config_dir,
+                                         default_model_config_file)
+default_model_key_value = 'FourTankSystem'
 
 # Animation video default parameters
-video_name = "data-driven_mpc_sim.mp4"
-default_video_path = os.path.join(default_animation_dir, video_name)
+default_video_name = "data-driven_mpc_sim.mp4"
+default_video_path = os.path.join(default_animation_dir, default_video_name)
 default_video_fps = 100
 default_video_bitrate = 1800
 
@@ -86,6 +94,15 @@ default_t_sim = 600 # Default simulation length in time steps
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Direct Data-Driven MPC "
                                      "Controller Example")
+    # Model configuration file arguments
+    parser.add_argument("--model_config_path", type=str,
+                        default=default_model_config_path,
+                        help="The path to the YAML configuration file "
+                        "containing the model parameters.")
+    parser.add_argument("--model_key_value", type=str,
+                        default=default_model_key_value,
+                        help="The key to access the model parameters in the "
+                        "configuration file.")
     # Data-Driven MPC controller arguments
     parser.add_argument("--n_mpc_step", type=int,
                         default=None,
@@ -139,6 +156,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     # --- Parse arguments ---
     args = parse_args()
+
+    # Model parameters
+    model_config_path = args.model_config_path
+    model_key_value = args.model_key_value
     
     # Data-Driven MPC controller arguments
     n_mpc_step = args.n_mpc_step
@@ -164,7 +185,9 @@ def main() -> None:
     # 1. Define Simulation and Controller Parameters
     # ==============================================
     # --- Define system model (simulation) ---
-    system_model = FourTankSystem(verbose=verbose)
+    system_model = LTISystemModel(config_file=model_config_path,
+                                  model_key_value=model_key_value,
+                                  verbose=verbose)
 
     # Override the upper bound of the system measurement noise
     # with parsed argument if passed
