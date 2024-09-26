@@ -4,6 +4,7 @@ from utilities.initial_state_estimation import (
     observability_matrix, toeplitz_input_output_matrix,
     estimate_initial_state, calculate_equilibrium_output_from_input,
     calculate_equilibrium_input_from_output)
+from utilities.yaml_config_loading import load_yaml_config_params
 
 class LTIModel:
     """
@@ -284,3 +285,81 @@ class LTIModel:
                 measurement noise.
         """
         self.eps_max = eps_max
+
+class LTISystemModel(LTIModel):
+    """
+    A class for a Linear Time-Invariant (LTI) system in state-space form based
+    on a specified YAML configuration file.
+    
+    Attributes:
+        A (np.ndarray): System state matrix.
+        B (np.ndarray): Input matrix.
+        C (np.ndarray): Output matrix.
+        D (np.ndarray): Feedforward matrix.
+        eps_max (float): Upper bound of the system measurement noise.
+        verbose (int): The verbose level.
+    
+    Note:
+        This class dynamically loads the model parameters from a YAML
+        configuration file.
+    """
+    def __init__(
+        self,
+        config_file: str,
+        model_key_value: str = None,
+        verbose: int = 0):
+        """
+        Initialize a Linear Time-Invariant (LTI) system model by loading
+        parameters from a YAML config file.
+
+        Args:
+            config_file (str): The path to the YAML configuration file.
+            model_key_value (str): The key to access the specific model
+                parameters in the config file.
+            verbose (int): The verbose level.
+        
+        Raises:
+            FileNotFoundError: If the YAML configuration file is not found.
+            ValueError: If `model_key_value` or the required matrices (A, B,
+                C, or D) are missing in the configuration file, or if the
+                dimensions of the required matrices are incorrect.
+        """
+        self.verbose = verbose
+        
+        # Load model parameters from config file
+        params = load_yaml_config_params(config_file=config_file,
+                                         key=model_key_value)
+        
+        if self.verbose:
+            print(f"Loaded model parameters from {config_file} with key "
+                  f"'{model_key_value}'")
+
+        # Validate that required matrix keys are present
+        if ('A' not in params or 'B' not in params or
+            'C' not in params or 'D' not in params):
+            raise ValueError("Missing required matrices (A, B, C, or D) in "
+                             "the config file.")
+
+        # Extract the system matrices from the loaded parameters
+        A = np.array(params['A'], dtype=float)
+        B = np.array(params['B'], dtype=float)
+        C = np.array(params['C'], dtype=float)
+        D = np.array(params['D'], dtype=float)
+        eps_max = params.get('eps_max', 0)  # Default to 0 if not specified
+
+        # Validate matrix dimensions
+        if A.shape[0] != A.shape[1]:
+            raise ValueError("Matrix A must be square.")
+        if B.shape[0] != A.shape[0]:
+            raise ValueError("Matrix B's row count must match A's.")
+        if C.shape[1] != A.shape[1]:
+            raise ValueError("Matrix C's column count must match A's.")
+        if D.shape[0] != C.shape[0]:
+            raise ValueError("Matrix D's row count must match C's.")
+        
+        # Initialize the base LTIModel class with the loaded parameters
+        super().__init__(A=A, B=B, C=C, D=D, eps_max=eps_max)
+        
+        if self.verbose:
+            print(f"System initialized with A: {A.shape}, B: {B.shape}, "
+                  f"C: {C.shape}, D: {D.shape}, eps_max: {eps_max}")
