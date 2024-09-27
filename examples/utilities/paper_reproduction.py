@@ -16,6 +16,8 @@ from utilities.model_simulation import LTIModel
 from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
     DirectDataDrivenMPCController)
 
+from examples.utilities.plot_styles import SETPOINT_LINE_PARAMS, LEGEND_PARAMS
+
 # Define Data-Driven MPC controller schemes
 class DataDrivenMPCScheme(Enum):
     """
@@ -72,12 +74,6 @@ DD_MPC_SCHEME_LINE_PARAMS = {
         'linestyle': ':',
         'linewidth': 2
     }
-}
-
-SETPOINT_LINE_PARAMS = {
-    'color': 'red',
-    'linestyle': 'solid',
-    'linewidth': 2
 }
 
 def get_equilibrium_state_from_output(
@@ -344,7 +340,8 @@ def plot_input_output_reproduction(
                           axs_u=axs_u,
                           axs_y=axs_y,
                           dpi=dpi,
-                          fontsize=fontsize)
+                          fontsize=fontsize,
+                          legend_params=LEGEND_PARAMS)
     
     # Show plot
     plt.show()

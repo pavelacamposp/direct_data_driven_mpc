@@ -60,6 +60,9 @@ from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
 
 from utilities.model_simulation import LTISystemModel
 
+from examples.utilities.plot_styles import (
+    INPUT_OUTPUT_PLOT_PARAMS, INPUT_OUTPUT_PLOT_PARAMS_SMALL)
+
 # Directory paths
 dirname = os.path.dirname
 project_dir = dirname(dirname(__file__))
@@ -328,7 +331,8 @@ def main() -> None:
                       u_s=u_s,
                       y_s=y_s,
                       figsize=(14, 8),
-                      dpi=100)
+                      dpi=100,
+                      **INPUT_OUTPUT_PLOT_PARAMS)
     
     # --- Plot data including initial input-output sequences ---
     # Create data arrays including initial input-output data used for
@@ -347,7 +351,8 @@ def main() -> None:
                       y_s=y_s,
                       initial_steps=N,
                       figsize=(14, 8),
-                      dpi=100)
+                      dpi=100,
+                      **INPUT_OUTPUT_PLOT_PARAMS_SMALL)
 
     # --- Animate extended input-output data ---
     if verbose:
@@ -360,7 +365,8 @@ def main() -> None:
                                       initial_steps=N,
                                       figsize=(14, 8),
                                       dpi=100,
-                                      interval=1)
+                                      interval=1,
+                                      **INPUT_OUTPUT_PLOT_PARAMS_SMALL)
     plt.show() # Show animation
     
     if save_video:
