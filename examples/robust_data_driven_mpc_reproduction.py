@@ -86,9 +86,10 @@ def parse_args() -> argparse.Namespace:
                         "initialization to ensure reproducible results. "
                         "Defaults to 0.")
     # Verbose argument
-    parser.add_argument("--verbose", type=int, default=1,
-                        choices=[0, 1],
-                        help="Verbose level")
+    parser.add_argument("--verbose", type=int, default=2,
+                        choices=[0, 1, 2],
+                        help="The verbosity level: 0 = no output, 1 = "
+                        "minimal output, 2 = detailed output.")
     
     # TODO: Add arguments
     
@@ -109,11 +110,18 @@ def main() -> None:
     # 1. Define Simulation and Controller Parameters
     # ==============================================
     # --- Define system model (simulation) ---
+    if verbose:
+        print("Loading system parameters from configuration file")
+
     system_model = LTISystemModel(config_file=model_config_path,
                                   model_key_value=model_key_value,
                                   verbose=verbose)
 
     # --- Define Data-Driven MPC Controller Parameters ---
+    if verbose:
+        print("Loading Data-Driven MPC controller parameters from "
+              "configuration file")
+
     # Load Data-Driven MPC controller parameters from configuration file
     m = system_model.get_number_inputs() # Number of inputs
     p = system_model.get_number_outputs() # Number of outputs
@@ -130,9 +138,15 @@ def main() -> None:
     # Create a Random Number Generator for reproducibility
     np_random = np.random.default_rng(seed=seed)
 
+    if verbose:
+        print(f"Random number generator initialized with seed: {seed}")
+
     # ==============================================
     # 2. Randomize Initial System State (Simulation)
     # ==============================================
+    if verbose:
+        print(f"Randomizing initial system state")
+
     # Randomize the initial internal state of the system to ensure
     # the model starts in a plausible random state
     x_0 = randomize_initial_system_state(system_model=system_model,
@@ -142,23 +156,36 @@ def main() -> None:
     # Set system state to the estimated plausible random initial state
     system_model.set_state(state=x_0)
 
+    if verbose > 1:
+        print(f"    Initial system state set to: {x_0}")
+
     # ====================================================
     # 3. Initial Input-Output Data Generation (Simulation)
     # ====================================================
+    if verbose:
+        print("Generating initial input-output data")
+
     # Generate initial input-output data using a
     # generated persistently exciting input
     u_d, y_d = generate_initial_input_output_data(
         system_model=system_model,
         controller_config=dd_mpc_config,
         np_random=np_random)
+    
+    if verbose > 1:
+        print(f"    Input data shape: {u_d.shape}, Output data shape: "
+              f"{y_d.shape}")
 
     # ===============================================
     # 4. Data-Driven MPC Controller Instance Creation
     # ===============================================
-    # Create a Direct Data-Driven MPC controller
     if verbose:
-        print(f"Initializing Robust Data-Driven MPC controllers")
-    
+        formatted_schemes = ', '.join([scheme.name for scheme
+                                       in dd_mpc_controller_schemes])
+        print("Initializing Robust Data-Driven MPC controllers following "
+              f"schemes: {formatted_schemes}")
+
+    # Create Direct Data-Driven MPC controllers for each scheme
     dd_mpc_controllers = create_data_driven_mpc_controllers_reproduction(
         controller_config=dd_mpc_config,
         u_d=u_d,
@@ -168,6 +195,10 @@ def main() -> None:
     # ========================================================
     # 5. Set Initial System State from Output for Reproduction
     # ========================================================
+    if verbose:
+        print("Setting initial system output to y_0 = [0.4, 0.4] for "
+              "reproduction")
+
     # To set the initial system output (y_0 = [0.4, 0.4]) to reproduce the
     # results from the paper example, we estimate the initial system state
     # corresponding to `y_0` using the system equations and update the model
@@ -186,9 +217,17 @@ def main() -> None:
     # input-output pair for reproduction
     system_model.set_state(xrep_0)
 
+    if verbose > 1:
+        print(f"    Initial system state set to: {xrep_0} based on "
+              "equilibrium output")
+
     # =============================================================
     # 6. Initial Simulation to Store Past Input-Output Measurements
     # =============================================================
+    if verbose:
+        print("Simulating `n` steps using control input setpoint to "
+              "update controllers' past input-output measurements")
+
     # Simulate `n` (the estimated system order) steps of the system using a
     # constant input (the controller's input setpoint). The resulting
     # input-output trajectory is then used to update the past `n` input-output
@@ -209,16 +248,24 @@ def main() -> None:
         controller.set_past_input_output_data(
             u_past=U_n.reshape(-1, 1),
             y_past=Y_n.reshape(-1, 1))
+        
+    if verbose:
+        print("Controllers' past `n` input-output measurements updated")
+        if verbose > 1:
+            print(f"    Past input data = {U_n.shape}, Past output data = "
+                  f"{Y_n.shape}")
 
     # ===============================
     # 7. Data-Driven MPC Control Loop
     # ===============================
+    if verbose:
+        print("Starting control system simulation for each Robust "
+              "Data-Driven MPC scheme")
+
     # Simulate the Data-Driven MPC control systems following Algorithm 1 for a
     # Data-Driven MPC Scheme, and Algorithm 2 for an n-Step Data-Driven MPC
     # Scheme, as described in [1].
-    if verbose:
-        print("Starting Data-Driven MPC control systems simulation")
-    
+    #
     # Simulate from `n` to `T - n`, considering that the first `n` steps are
     # used to store the past `n` input-output measurements for each
     # controller. Here, `n` is the estimated system order from the Data-Driven

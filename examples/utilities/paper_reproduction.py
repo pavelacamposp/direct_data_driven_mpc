@@ -225,7 +225,8 @@ def simulate_data_driven_mpc_control_loops_reproduction(
         n_steps (int): The number of time steps for the simulation.
         np_random (Generator): A Numpy random number generator for generating
             random noise for the system's output.
-        verbose (int): The verbosity level.
+        verbose (int): The verbosity level: 0 = no output, 1 = minimal output,
+            2 = detailed output.
     
     Returns:
         Tuple[List[np.ndarray], List[np.ndarray]]: A tuple containing:

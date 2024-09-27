@@ -149,9 +149,10 @@ def parse_args() -> argparse.Namespace:
                         default=default_video_bitrate,
                         help="Bitrate value for the saved video.")
     # Verbose argument
-    parser.add_argument("--verbose", type=int, default=1,
-                        choices=[0, 1],
-                        help="Verbose level")
+    parser.add_argument("--verbose", type=int, default=2,
+                        choices=[0, 1, 2],
+                        help="The verbosity level: 0 = no output, 1 = "
+                        "minimal output, 2 = detailed output.")
     
     # TODO: Add arguments
     
@@ -193,19 +194,38 @@ def main() -> None:
     # 1. Define Simulation and Controller Parameters
     # ==============================================
     # --- Define system model (simulation) ---
+    if verbose:
+        print("Loading system parameters from configuration file")
+
     system_model = LTISystemModel(config_file=model_config_path,
                                   model_key_value=model_key_value,
                                   verbose=verbose)
+
+    # Override model parameters with parsed arguments
+    if (eps_max is not None):
+        if verbose:
+            print("Overriding model parameters")
 
     # Override the upper bound of the system measurement noise
     # with parsed argument if passed
     if eps_max is not None:
         system_model.set_eps_max(eps_max=eps_max)
+
+        if verbose > 1:
+            if eps_max == 0:
+                print("    System set to ideal, noise-free conditions")
+            else:
+                print("    Upper bound of system measurement noise set to: "
+                      f"{eps_max}")
+    
     # If set to zero, the system is considered ideal with noise-free
-    # conditions, which enables testing of the Nominal Data-Driven MPC
-    # controller
+    # conditions, enabling testing of the Nominal Data-Driven MPC controller
 
     # --- Define Data-Driven MPC Controller Parameters ---
+    if verbose:
+        print("Loading Data-Driven MPC controller parameters from "
+              "configuration file")
+
     # Load Data-Driven MPC controller parameters from configuration file
     m = system_model.get_number_inputs() # Number of inputs
     p = system_model.get_number_outputs() # Number of outputs
@@ -217,22 +237,40 @@ def main() -> None:
         eps_bar=eps_max,
         verbose=verbose)
     
+    # Override controller parameters with parsed arguments
+    if (n_mpc_step is not None or controller_type_arg is not None
+        or slack_var_const_type_arg is not None):
+        if verbose:
+            print("Overriding Data-Driven MPC controller parameters")
+    
     # Override the number of consecutive applications of the
     # optimal input (n-Step Data-Driven MPC Scheme (multi-step))
     # with parsed argument if passed
     if n_mpc_step is not None:
         dd_mpc_config['n_mpc_step'] = n_mpc_step
+
+        if verbose > 1:
+            print("    n-Step Data-Driven MPC scheme parameter "
+                  f"(`n_mpc_step`) set to: {n_mpc_step}")
     
     # Override the Controller type with parsed argument if passed
     if controller_type_arg is not None:
         dd_mpc_config['controller_type'] = controller_type_mapping[
             controller_type_arg]
+        
+        if verbose > 1:
+            print("    Data-Driven MPC controller type set to: "
+                  f"{dd_mpc_config['controller_type'].name}")
     
     # Override the slack variable constraint type
     # with parsed argument if passed
     if slack_var_const_type_arg is not None:
         dd_mpc_config['slack_var_constraint_type'] = (
             slack_var_constraint_type_mapping[slack_var_const_type_arg])
+        
+        if verbose > 1:
+            print("    Slack variable constraint type set to: "
+                  f"{dd_mpc_config['slack_var_constraint_type'].name}")
 
     # --- Define Control Simulation parameters ---
     n_steps = t_sim + 1 # Number of simulation steps
@@ -240,9 +278,18 @@ def main() -> None:
     # Create a Random Number Generator for reproducibility
     np_random = np.random.default_rng(seed=seed)
 
+    if verbose:
+        if seed is None:
+            print("Random number generator initialized with a random seed")
+        else:
+            print(f"Random number generator initialized with seed: {seed}")
+
     # ==============================================
     # 2. Randomize Initial System State (Simulation)
     # ==============================================
+    if verbose:
+        print(f"Randomizing initial system state")
+
     # Randomize the initial internal state of the system to ensure
     # the model starts in a plausible random state
     x_0 = randomize_initial_system_state(system_model=system_model,
@@ -252,37 +299,48 @@ def main() -> None:
     # Set system state to the estimated plausible random initial state
     system_model.set_state(state=x_0)
 
+    if verbose > 1:
+        print(f"    Initial system state set to: {x_0}")
+
     # ====================================================
     # 3. Initial Input-Output Data Generation (Simulation)
     # ====================================================
+    if verbose:
+        print("Generating initial input-output data")
+
     # Generate initial input-output data using a
     # generated persistently exciting input
     u_d, y_d = generate_initial_input_output_data(
         system_model=system_model,
         controller_config=dd_mpc_config,
         np_random=np_random)
+    
+    if verbose > 1:
+        print(f"    Input data shape: {u_d.shape}, Output data shape: "
+              f"{y_d.shape}")
 
     # ===============================================
     # 4. Data-Driven MPC Controller Instance Creation
     # ===============================================
-    # Create a Direct Data-Driven MPC controller
     if verbose:
         controller_type = dd_mpc_config['controller_type']
         print(f"Initializing {controller_type.name.capitalize()} "
               "Data-Driven MPC controller")
-    
+
+    # Create a Direct Data-Driven MPC controller
     dd_mpc_controller = create_data_driven_mpc_controller(
         controller_config=dd_mpc_config, u_d=u_d, y_d=y_d)
 
     # ===============================
     # 5. Data-Driven MPC Control Loop
     # ===============================
+    if verbose:
+        print(f"Starting {controller_type.name.capitalize()} Data-Driven "
+              "MPC control system simulation")
+
     # Simulate the Data-Driven MPC control system following Algorithm 1 for a
     # Data-Driven MPC Scheme, and Algorithm 2 for an n-Step Data-Driven MPC
     # Scheme, as described in [1].
-    if verbose:
-        print("Starting Data-Driven MPC control system simulation")
-    
     u_sys, y_sys = simulate_data_driven_mpc_control_loop(
         system_model=system_model,
         data_driven_mpc_controller=dd_mpc_controller,
@@ -318,7 +376,7 @@ def main() -> None:
     # Plot extended input-output data
     if verbose:
         print("Displaying control system inputs and outputs including "
-              "initial input-output measured data")
+              "initial input-output measurements")
     
     plot_input_output(u_k=U,
                       y_k=Y,
@@ -346,8 +404,11 @@ def main() -> None:
     
     if save_video:
         if verbose:
-            print('Saving input-output animation as an MP4 video')
-            print(f'Animation video path: {video_path}')
+            print("Saving extended input-output animation as an MP4 video")
+            if verbose > 1:
+                print(f"    Saving video to: {video_path}")
+                print(f"    Video FPS: {video_fps}, Bitrate: "
+                      f"{video_bitrate}, Total Frames: {N + n_steps}")
         
         # Save input-output animation as an MP4 video
         save_animation(animation=ani,
@@ -357,7 +418,7 @@ def main() -> None:
                        file_path=video_path)
         
         if verbose:
-            print('Animation MP4 video saved.')
+            print("Animation MP4 video saved successfully")
 
     plt.close() # Close figures
 

@@ -221,7 +221,8 @@ def simulate_data_driven_mpc_control_loop(
         n_steps (int): The number of time steps for the simulation.
         np_random (Generator): A Numpy random number generator for generating
             random noise for the system's output.
-        verbose (int): The verbosity level.
+        verbose (int): The verbosity level: 0 = no output, 1 = minimal output,
+            2 = detailed output.
     
     Returns:
         Tuple[np.ndarray, np.ndarray]: A tuple containing two arrays:
@@ -245,6 +246,8 @@ def simulate_data_driven_mpc_control_loop(
     # measurement noise (simulation)
 
     # Retrieve Data-Driven MPC controller parameters
+    # Control input setpoint
+    u_s = data_driven_mpc_controller.u_s
     # System output setpoint
     y_s = data_driven_mpc_controller.y_s
     # Number of consecutive applications of the optimal input
@@ -305,17 +308,23 @@ def simulate_data_driven_mpc_control_loop(
         # --- Algorithm 2 (n-step): ---
         # 3) Set t = t + n and go back to 1).
 
-        if verbose:
+        if verbose > 1:
             # Get current step MPC cost value
             mpc_cost_val = (
                 data_driven_mpc_controller.get_optimal_cost_value())
-            # Calculate output error
+            # Calculate input and output errors
+            u_error = u_s.flatten() - u_sys[k, :].flatten()
             y_error = y_s.flatten() - y_sys[k, :].flatten()
-            # Format output error
-            formatted_y_error = ', '.join(
-                [f'e_{i} = {error:>6.3f}' for i, error in enumerate(y_error)])
+            # Format error arrays for printing
+            formatted_u_error = ', '.join([f'u_{i + 1}e = {error:>6.3f}'
+                                           for i, error
+                                           in enumerate(u_error)])
+            formatted_y_error = ', '.join([f'y_{i + 1}e = {error:>6.3f}'
+                                           for i, error
+                                           in enumerate(y_error)])
             # Print time step, MPC cost value, and formatted error
-            print(f"Time step: {t:>4} - MPC cost value: {mpc_cost_val:>8.4f}"
-                  f" - Error: {formatted_y_error}")
+            print(f"    Time step: {t:>4} - MPC cost value: "
+                  f"{mpc_cost_val:>8.4f} - Error: {formatted_u_error}, "
+                  f"{formatted_y_error}")
     
     return u_sys, y_sys

@@ -75,6 +75,8 @@ def get_data_driven_mpc_controller_params(
         eps_bar (Optional[float]): The estimated upper bound of the system
             measurement noise. If provided, it overrides the corresponding
             value from the configuration file. Defaults to `None`.
+        verbose (int): The verbosity level: 0 = no output, 1 = minimal
+                output, 2 = detailed output.
     
     Returns:
         DataDrivenMPCParamsDictType: A dictionary of parameters configured for
@@ -96,8 +98,8 @@ def get_data_driven_mpc_controller_params(
     params = load_yaml_config_params(config_file=config_file,
                                      key=controller_key_value)
 
-    if verbose:
-        print(f"Loaded Data-Driven MPC controller parameters from "
+    if verbose > 1:
+        print(f"    Data-Driven MPC controller parameters loaded from "
               f"{config_file} with key '{controller_key_value}'")
     
     # Validate that required parameter keys are present
@@ -124,6 +126,8 @@ def get_data_driven_mpc_controller_params(
     if eps_bar is not None:
         # Override `eps_max` if passed
         eps_max = eps_bar
+        if verbose > 1:
+            print(f"    Controller `eps_max` parameter set to: {eps_bar}")
     dd_mpc_params['eps_max'] = eps_max
     # Prediction horizon
     L = params['L']
@@ -174,14 +178,26 @@ def get_data_driven_mpc_controller_params(
     # System output setpoint
     dd_mpc_params['y_s'] = np.array(y_s, dtype=float).reshape(-1, 1)
 
-    if verbose:
+    # Print Data-Driven MPC controller initialization details
+    # based on verbosity level
+    if verbose == 1:
+        print("Data-Driven MPC controller initialized with loaded parameters")
+    if verbose > 1:
         print("Data-Driven MPC controller initialized with:")
         for key, value in dd_mpc_params.items():
             if key in ['Q', 'R']:
-                print(f"{key}: {value[0, 0]} {value.shape}")
+                # Print scalar and shape for large matrices
+                print(f"    {key}: scalar {value[0, 0]} {value.shape}")
+            elif key in ['controller_type', 'slack_var_constraint_type']:
+                # Print name for enum types
+                print(f"    {key}: {value.name}")
+            elif key in ['u_s', 'y_s']:
+                # Format setpoint arrays in a single line
+                formatted_array = ', '.join([f"[{row[0]}]" for row in value])
+                print(f"    {key}: [{formatted_array}]")
             else:
-                print(f"{key}: {value}")
-    
+                print(f"    {key}: {value}")
+
     return dd_mpc_params
 
 def create_data_driven_mpc_controller(

@@ -298,7 +298,8 @@ class LTISystemModel(LTIModel):
         C (np.ndarray): Output matrix.
         D (np.ndarray): Feedforward matrix.
         eps_max (float): Upper bound of the system measurement noise.
-        verbose (int): The verbose level.
+        verbose (int): The verbosity level: 0 = no output, 1 = minimal output,
+            2 = detailed output.
     
     Note:
         This class dynamically loads the model parameters from a YAML
@@ -317,7 +318,8 @@ class LTISystemModel(LTIModel):
             config_file (str): The path to the YAML configuration file.
             model_key_value (str): The key to access the specific model
                 parameters in the config file.
-            verbose (int): The verbose level.
+            verbose (int): The verbosity level: 0 = no output, 1 = minimal
+                output, 2 = detailed output.
         
         Raises:
             FileNotFoundError: If the YAML configuration file is not found.
@@ -331,8 +333,8 @@ class LTISystemModel(LTIModel):
         params = load_yaml_config_params(config_file=config_file,
                                          key=model_key_value)
         
-        if self.verbose:
-            print(f"Loaded model parameters from {config_file} with key "
+        if self.verbose > 1:
+            print(f"    Model parameters loaded from {config_file} with key "
                   f"'{model_key_value}'")
 
         # Validate that required matrix keys are present
@@ -361,6 +363,10 @@ class LTISystemModel(LTIModel):
         # Initialize the base LTIModel class with the loaded parameters
         super().__init__(A=A, B=B, C=C, D=D, eps_max=eps_max)
         
-        if self.verbose:
-            print(f"System initialized with A: {A.shape}, B: {B.shape}, "
-                  f"C: {C.shape}, D: {D.shape}, eps_max: {eps_max}")
+        # Print system initialization details based on verbosity level
+        if verbose == 1:
+            print("System model initialized with loaded parameters")
+        if self.verbose > 1:
+            print(f"System model initialized with:")
+            print(f"    A: {A.shape}, B: {B.shape}, C: {C.shape}, D: "
+                  f"{D.shape}, eps_max: {eps_max}")
