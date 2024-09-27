@@ -30,6 +30,7 @@ def plot_input_output(
     u_ylimits: Optional[List[Tuple[float, float]]] = None,
     y_ylimits: Optional[List[Tuple[float, float]]] = None,
     fontsize: int = 12,
+    legend_params: dict[str, Any] = {},
     data_label: str = "",
     axs_u: Optional[List[Axes]] = None,
     axs_y: Optional[List[Axes]] = None
@@ -102,7 +103,10 @@ def plot_input_output(
             specifying the Y-axis limits for the input subplots.
         y_ylimits (Optional[List[Tuple[float, float]]]): A list of tuples
             specifying the Y-axis limits for the output subplots.
-        fontsize (int): The fontsize for labels, legends and axes ticks.
+        fontsize (int): The fontsize for labels and axes ticks.
+        legend_params (dict[str, Any]): A dictionary of Matplotlib
+            properties for customizing the plot legends (e.g., fontsize,
+            loc, handlelength).
         data_label (str): The label for the current data sequences.
         axs_u (Optional[List[Axes]]): List of external axes for input plots.
         axs_y (Optional[List[Axes]]): List of external axes for output plots.
@@ -164,13 +168,15 @@ def plot_input_output(
                   display_control_text=display_control_text,
                   ylimit=u_ylimit,
                   fontsize=fontsize,
+                  legend_params=legend_params,
                   fig=fig)
         
         # Remove duplicate labels from legend
         # if figure was created externally
         if is_ext_fig:
-            remove_legend_duplicates(
-                axis=axs_u[i], last_label=f'$u_{i + 1}^s$')
+            remove_legend_duplicates(axis=axs_u[i],
+                                     legend_params=legend_params,
+                                     last_label=f'$u_{i + 1}^s$')
 
     # Plot output data
     for j in range(p):
@@ -193,13 +199,15 @@ def plot_input_output(
                   display_control_text=display_control_text,
                   ylimit=y_ylimit,
                   fontsize=fontsize,
+                  legend_params=legend_params,
                   fig=fig)
         
         # Remove duplicate labels from legend
         # if figure was created externally
         if is_ext_fig:
-            remove_legend_duplicates(
-                axis=axs_y[j], last_label=f'$y_{j + 1}^s$')
+            remove_legend_duplicates(axis=axs_y[j],
+                                     legend_params=legend_params,
+                                     last_label=f'$y_{j + 1}^s$')
             
     # Show the plot if the figure was created internally
     if not is_ext_fig:
@@ -222,6 +230,7 @@ def plot_data(
     display_control_text: bool,
     ylimit: Optional[Tuple[float, float]],
     fontsize: int,
+    legend_params: dict[str, Any],
     fig: Figure
 ) -> None:
     """
@@ -265,7 +274,10 @@ def plot_data(
             label on the plot.
         ylimit (Optional[Tuple[float, float]]): A tuple specifying the Y-axis
             limits for the plot.
-        fontsize (int): The fontsize for labels, legends and axes ticks.
+        fontsize (int): The fontsize for labels and axes ticks.
+        legend_params (dict[str, Any]): A dictionary of Matplotlib properties
+            for customizing the plot legend (e.g., fontsize, loc,
+            handlelength).
         fig (Figure): The Matplotlib figure object containing the axis.
     """
     T = data.shape[0] # Data length
@@ -327,7 +339,7 @@ def plot_data(
     axis.set_xlabel('Time step $k$', fontsize=fontsize)
     axis.set_ylabel(f'{var_label} ${var_symbol}_{index + 1}$',
                     fontsize=fontsize)
-    axis.legend(fontsize=fontsize)
+    axis.legend(**legend_params)
     axis.tick_params(axis='both', labelsize=fontsize)
     
     # Set x-limits
@@ -354,7 +366,8 @@ def plot_input_output_animation(
     figsize: Tuple[int, int] = (12, 8),
     dpi: int = 300,
     interval: int = 10,
-    fontsize: int = 12
+    fontsize: int = 12,
+    legend_params: dict[str, Any] = {}
 ) -> FuncAnimation:
     """
     Create a Matplotlib animation showing the progression of input-output data
@@ -415,7 +428,10 @@ def plot_input_output_animation(
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
         interval (int): The time between frames in milliseconds.
-        fontsize (int): The fontsize for labels, legends and axes ticks.
+        fontsize (int): The fontsize for labels and axes ticks.
+        legend_params (dict[str, Any]): A dictionary of Matplotlib properties
+            for customizing the plot legend (e.g., fontsize, loc,
+            handlelength).
     """
     # Check input-output data dimensions
     if not (u_k.shape[0] == y_k.shape[0]):
@@ -467,6 +483,7 @@ def plot_input_output_animation(
                                   initial_text=initial_excitation_text,
                                   control_text=control_text,
                                   fontsize=fontsize,
+                                  legend_params=legend_params,
                                   lines=u_lines,
                                   rects=u_rects,
                                   rect_lines=u_rect_lines,
@@ -489,6 +506,7 @@ def plot_input_output_animation(
                                   initial_text=initial_measurement_text,
                                   control_text=control_text,
                                   fontsize=fontsize,
+                                  legend_params=legend_params,
                                   lines=y_lines,
                                   rects=y_rects,
                                   rect_lines=y_rect_lines,
@@ -569,6 +587,7 @@ def initialize_data_animation(
     initial_text: str,
     control_text: str,
     fontsize: int,
+    legend_params: dict[str, Any],
     lines: List[Line2D],
     rects: List[Rectangle],
     rect_lines: List[Line2D],
@@ -612,7 +631,11 @@ def initialize_data_animation(
             period of the plot.
         control_text (str): Label text to display over the post-initial
             control period.
-        fontsize (int): The fontsize for labels, legends and axes ticks.
+        fontsize (int): The fontsize for labels and axes ticks.
+        legend_params (dict[str, Any]): A dictionary of Matplotlib properties
+            for customizing the plot legend (e.g., fontsize, loc,
+            handlelength). If the 'loc' key is present in the dictionary, it
+            overrides the `legend_loc` value.
         lines (List[Line2D]): The list where the initialized plot lines will
             be stored.
         rects (List[Rectangle]): The list where the initialized rectangles
@@ -648,7 +671,7 @@ def initialize_data_animation(
     # Format labels, legend and ticks
     axis.set_xlabel('Time step $k$', fontsize=fontsize)
     axis.set_ylabel(f'{var_label} ${var_symbol}_{index + 1}$', fontsize=fontsize)
-    axis.legend(fontsize=fontsize, loc=legend_loc)
+    axis.legend(**legend_params, loc=legend_loc)
     axis.tick_params(axis='both', labelsize=fontsize)
 
     # Define axis limits
@@ -847,13 +870,20 @@ def get_text_width_in_data(
     
     return text_box_width
 
-def remove_legend_duplicates(axis: Axes, last_label: Optional[str] = None) -> None:
+def remove_legend_duplicates(
+    axis: Axes,
+    legend_params: dict[str, Any],
+    last_label: Optional[str] = None
+) -> None:
     """
     Remove duplicate entries from the legend of a Matplotlib axis. Optionally,
     move a specified label to the end of the legend.
 
     Args:
         axis (Axes): The Matplotlib axis containing the legend to modify.
+        legend_params (dict[str, Any]): A dictionary of Matplotlib properties
+            for customizing the plot legend (e.g., fontsize, loc,
+            handlelength).
         last_label (Optional[str]): The label that should appear last in the
             legend. If not provided, no specific label is moved to the end.
     """
@@ -867,7 +897,7 @@ def remove_legend_duplicates(axis: Axes, last_label: Optional[str] = None) -> No
         by_label[last_label] = last_handle
 
     # Update the legend with the unique handles and labels
-    axis.legend(by_label.values(), by_label.keys())
+    axis.legend(by_label.values(), by_label.keys(), **legend_params)
 
 def create_figure_subplots(
     m: int,
