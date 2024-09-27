@@ -334,7 +334,7 @@ def plot_input_output_reproduction(
                           inputs_line_params=controller_line_params,
                           outputs_line_params=controller_line_params,
                           setpoints_line_params=SETPOINT_LINE_PARAMS,
-                          data_label=f" (${scheme_config['label']}$)",
+                          data_label=f" ({scheme_config['label']})",
                           u_ylimits=u_ylimits,
                           y_ylimits=y_ylimits,
                           axs_u=axs_u,
