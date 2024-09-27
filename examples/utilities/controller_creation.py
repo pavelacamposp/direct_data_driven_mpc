@@ -8,19 +8,6 @@ from utilities.yaml_config_loading import load_yaml_config_params
 from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
     DirectDataDrivenMPCController, DataDrivenMPCType, SlackVarConstraintTypes)
 
-# Directory paths
-dirname = os.path.dirname
-examples_directory = dirname(dirname(__file__))
-config_directory = os.path.join(examples_directory, 'config')
-
-# Controller config file paths
-controller_config_file = 'data_driven_mpc_example_params.yaml'
-controller_config_path = os.path.join(config_directory,
-                                      controller_config_file)
-
-# Controller config key
-controller_key_value = 'data_driven_mpc_params'
-
 # Define Data-Driven MPC controller types
 DataDrivenMPCTypesMap = {
     0: DataDrivenMPCType.NOMINAL,
@@ -53,14 +40,24 @@ class DataDrivenMPCParamsDictType(TypedDict, total=False):
     u_s: np.ndarray
     y_s: np.ndarray
 
+# Define a list of required Data-Driven controller parameters
+# from configuration files
+DD_MPC_FILE_PARAMS = ['N', 'u_d_range', 'epsilon_bar', 'L', 'Q_scalar',
+                      'R_scalar', 'lambda_sigma', 'lambda_alpha_epsilon_bar',
+                      'slack_var_constraint_type', 'controller_type', 'n',
+                      'u_s', 'y_s']
+
 def get_data_driven_mpc_controller_params(
+    config_file: str,
+    controller_key_value: str,
     m: int,
     p: int,
-    eps_bar: Optional[float] = None
+    eps_bar: Optional[float] = None,
+    verbose: int = 0
 ) -> DataDrivenMPCParamsDictType:
     """
     Load and initialize parameters for a Data-Driven MPC controller from a
-    configuration file.
+    YAML configuration file.
     
     The controller parameters are defined based on the Nominal and Robust
     Data-Driven MPC controller formulations from [1]. The number of control
@@ -70,6 +67,9 @@ def get_data_driven_mpc_controller_params(
     the configuration file.
 
     Args:
+        config_file (str): The path to the YAML configuration file.
+        controller_key_value (str): The key to access the specific controller
+            parameters in the config file.
         m (int): The number of control inputs.
         p (int): The number of system outputs.
         eps_bar (Optional[float]): The estimated upper bound of the system
@@ -80,6 +80,11 @@ def get_data_driven_mpc_controller_params(
         DataDrivenMPCParamsDictType: A dictionary of parameters configured for
             the Data-Driven MPC controller.
     
+    Raises:
+        FileNotFoundError: If the YAML configuration file is not found.
+        ValueError: If `controller_key_value` or if required Data-Driven
+            controller parameters are missing in the configuration file.
+
     References:
         [1] J. Berberich, J. Köhler, M. A. Müller and F. Allgöwer,
             "Data-Driven Model Predictive Control With Stability and
@@ -88,8 +93,18 @@ def get_data_driven_mpc_controller_params(
             doi: 10.1109/TAC.2020.3000182.
     """
     # Load controller parameters from config file
-    params = load_yaml_config_params(config_file=controller_config_path,
+    params = load_yaml_config_params(config_file=config_file,
                                      key=controller_key_value)
+
+    if verbose:
+        print(f"Loaded Data-Driven MPC controller parameters from "
+              f"{config_file} with key '{controller_key_value}'")
+    
+    # Validate that required parameter keys are present
+    for key in DD_MPC_FILE_PARAMS:
+        if key not in params:
+            raise ValueError(f"Missing required parameter key '{key}' in the "
+                             "configuration file.")
     
     # Initialize Data-Driven MPC controller parameter dict
     dd_mpc_params = {}
@@ -158,6 +173,14 @@ def get_data_driven_mpc_controller_params(
     dd_mpc_params['u_s'] = np.array(u_s, dtype=float).reshape(-1, 1)
     # System output setpoint
     dd_mpc_params['y_s'] = np.array(y_s, dtype=float).reshape(-1, 1)
+
+    if verbose:
+        print("Data-Driven MPC controller initialized with:")
+        for key, value in dd_mpc_params.items():
+            if key in ['Q', 'R']:
+                print(f"{key}: {value[0, 0]} {value.shape}")
+            else:
+                print(f"{key}: {value}")
     
     return dd_mpc_params
 

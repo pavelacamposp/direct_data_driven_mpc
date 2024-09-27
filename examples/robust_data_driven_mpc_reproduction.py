@@ -48,12 +48,19 @@ dirname = os.path.dirname
 project_dir = dirname(dirname(__file__))
 examples_dir = os.path.join(project_dir, 'examples')
 models_config_dir = os.path.join(examples_dir, 'models', 'config')
+controller_config_dir = os.path.join(examples_dir, 'config')
 
 # Model configuration file
 model_config_file = 'four_tank_system_params.yaml'
 model_config_path = os.path.join(models_config_dir,
                                  model_config_file)
 model_key_value = 'FourTankSystem'
+
+# Data-Driven MPC controller configuration file
+controller_config_file = 'data_driven_mpc_example_params.yaml'
+controller_config_path = os.path.join(controller_config_dir,
+                                      controller_config_file)
+controller_key_value = 'data_driven_mpc_params'
 
 # Simulation parameters
 default_t_sim = 600 # Default simulation length in time steps
@@ -110,7 +117,12 @@ def main() -> None:
     # Load Data-Driven MPC controller parameters from configuration file
     m = system_model.get_number_inputs() # Number of inputs
     p = system_model.get_number_outputs() # Number of outputs
-    dd_mpc_config = get_data_driven_mpc_controller_params(m=m, p=p)
+    dd_mpc_config = get_data_driven_mpc_controller_params(
+        config_file=controller_config_path,
+        controller_key_value=controller_key_value,
+        m=m,
+        p=p,
+        verbose=verbose)
 
     # --- Define Control Simulation parameters ---
     n_steps = t_sim + 1 # Number of simulation steps

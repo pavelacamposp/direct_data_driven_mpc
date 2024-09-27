@@ -65,6 +65,7 @@ dirname = os.path.dirname
 project_dir = dirname(dirname(__file__))
 examples_dir = os.path.join(project_dir, 'examples')
 models_config_dir = os.path.join(examples_dir, 'models', 'config')
+controller_config_dir = os.path.join(examples_dir, 'config')
 default_animation_dir = os.path.join(project_dir, 'animation_outputs')
 
 # Model configuration file
@@ -72,6 +73,12 @@ default_model_config_file = 'four_tank_system_params.yaml'
 default_model_config_path = os.path.join(models_config_dir,
                                          default_model_config_file)
 default_model_key_value = 'FourTankSystem'
+
+# Data-Driven MPC controller configuration file
+default_controller_config_file = 'data_driven_mpc_example_params.yaml'
+default_controller_config_path = os.path.join(controller_config_dir,
+                                              default_controller_config_file)
+default_controller_key_value = 'data_driven_mpc_params'
 
 # Animation video default parameters
 default_video_name = "data-driven_mpc_sim.mp4"
@@ -103,6 +110,16 @@ def parse_args() -> argparse.Namespace:
                         default=default_model_key_value,
                         help="The key to access the model parameters in the "
                         "configuration file.")
+    # Data-Driven MPC controller configuration file arguments
+    parser.add_argument("--controller_config_path", type=str,
+                        default=default_controller_config_path,
+                        help="The path to the YAML configuration file "
+                        "containing the Data-Driven MPC controller "
+                        "parameters.")
+    parser.add_argument("--controller_key_value", type=str,
+                        default=default_controller_key_value,
+                        help="The key to access the Data-Driven MPC "
+                        "controller parameters in the configuration file.")
     # Data-Driven MPC controller arguments
     parser.add_argument("--n_mpc_step", type=int,
                         default=None,
@@ -160,6 +177,10 @@ def main() -> None:
     # Model parameters
     model_config_path = args.model_config_path
     model_key_value = args.model_key_value
+
+    # Data-Driven MPC controller parameters
+    controller_config_path = args.controller_config_path
+    controller_key_value = args.controller_key_value
     
     # Data-Driven MPC controller arguments
     n_mpc_step = args.n_mpc_step
@@ -202,7 +223,12 @@ def main() -> None:
     m = system_model.get_number_inputs() # Number of inputs
     p = system_model.get_number_outputs() # Number of outputs
     dd_mpc_config = get_data_driven_mpc_controller_params(
-        m=m, p=p, eps_bar=eps_max)
+        config_file=controller_config_path,
+        controller_key_value=controller_key_value,
+        m=m,
+        p=p,
+        eps_bar=eps_max,
+        verbose=verbose)
     
     # Override the number of consecutive applications of the
     # optimal input (n-Step Data-Driven MPC Scheme (multi-step))
