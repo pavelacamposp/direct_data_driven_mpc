@@ -64,8 +64,8 @@ from utilities.model_simulation import LTISystemModel
 dirname = os.path.dirname
 project_dir = dirname(dirname(__file__))
 examples_dir = os.path.join(project_dir, 'examples')
-models_config_dir = os.path.join(examples_dir, 'models', 'config')
-controller_config_dir = os.path.join(examples_dir, 'config')
+models_config_dir = os.path.join(examples_dir, 'config', 'models')
+controller_config_dir = os.path.join(examples_dir, 'config', 'controllers')
 default_animation_dir = os.path.join(project_dir, 'animation_outputs')
 
 # Model configuration file
