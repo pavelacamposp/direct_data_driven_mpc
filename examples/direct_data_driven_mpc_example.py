@@ -70,8 +70,8 @@ default_controller_key_value = 'data_driven_mpc_params'
 # Animation video default parameters
 default_video_name = "data-driven_mpc_sim.mp4"
 default_video_path = os.path.join(default_animation_dir, default_video_name)
-default_video_fps = 100
-default_video_bitrate = 1800
+default_video_fps = 200
+default_video_bitrate = 4500
 
 # Data-Driven MPC controller parameters
 controller_type_mapping = {
@@ -83,7 +83,7 @@ slack_var_constraint_type_mapping = {
     "Convex": SlackVarConstraintTypes.CONVEX,
     "None": SlackVarConstraintTypes.NONE
 }
-default_t_sim = 600 # Default simulation length in time steps
+default_t_sim = 400 # Default simulation length in time steps
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Direct Data-Driven MPC "
