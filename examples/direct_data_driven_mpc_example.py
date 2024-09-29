@@ -322,10 +322,10 @@ def main() -> None:
     # ===============================================
     # 4. Data-Driven MPC Controller Instance Creation
     # ===============================================
+    controller_type_str = dd_mpc_config['controller_type'].name.capitalize()
     if verbose:
-        controller_type = dd_mpc_config['controller_type']
-        print(f"Initializing {controller_type.name.capitalize()} "
-              "Data-Driven MPC controller")
+        print(f"Initializing {controller_type_str} Data-Driven MPC "
+              "controller")
 
     # Create a Direct Data-Driven MPC controller
     dd_mpc_controller = create_data_driven_mpc_controller(
@@ -335,8 +335,8 @@ def main() -> None:
     # 5. Data-Driven MPC Control Loop
     # ===============================
     if verbose:
-        print(f"Starting {controller_type.name.capitalize()} Data-Driven "
-              "MPC control system simulation")
+        print(f"Starting {controller_type_str} Data-Driven MPC control "
+              "system simulation")
 
     # Simulate the Data-Driven MPC control system following Algorithm 1 for a
     # Data-Driven MPC Scheme, and Algorithm 2 for an n-Step Data-Driven MPC
@@ -356,6 +356,8 @@ def main() -> None:
     y_s = dd_mpc_config['y_s'] # System output setpoint
 
     # --- Plot control system inputs and outputs ---
+    plot_title = f"{controller_type_str} Data-Driven MPC"
+    
     if verbose:
         print("Displaying control system inputs and outputs plot")
     
@@ -365,6 +367,7 @@ def main() -> None:
                       y_s=y_s,
                       figsize=(14, 8),
                       dpi=100,
+                      title=plot_title,
                       **INPUT_OUTPUT_PLOT_PARAMS)
     
     # --- Plot data including initial input-output sequences ---
@@ -385,6 +388,7 @@ def main() -> None:
                       initial_steps=N,
                       figsize=(14, 8),
                       dpi=100,
+                      title=plot_title,
                       **INPUT_OUTPUT_PLOT_PARAMS_SMALL)
 
     # --- Animate extended input-output data ---
@@ -399,6 +403,7 @@ def main() -> None:
                                       figsize=(14, 8),
                                       dpi=100,
                                       interval=1,
+                                      title=plot_title,
                                       **INPUT_OUTPUT_PLOT_PARAMS_SMALL)
     plt.show() # Show animation
     

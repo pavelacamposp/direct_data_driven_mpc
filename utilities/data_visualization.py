@@ -33,7 +33,8 @@ def plot_input_output(
     legend_params: dict[str, Any] = {},
     data_label: str = "",
     axs_u: Optional[List[Axes]] = None,
-    axs_y: Optional[List[Axes]] = None
+    axs_y: Optional[List[Axes]] = None,
+    title: Optional[str] = None
 ) -> None:
     """
     Plot input-output data with setpoints in a Matplotlib figure.
@@ -110,6 +111,9 @@ def plot_input_output(
         data_label (str): The label for the current data sequences.
         axs_u (Optional[List[Axes]]): List of external axes for input plots.
         axs_y (Optional[List[Axes]]): List of external axes for output plots.
+        title (Optional[str]): The title for the created plot figure. Set
+            only if the figure is created internally (i.e., `axs_u` and
+            `axs_y` are not provided).
     
     Raises:
         ValueError: If any array dimensions mismatch expected shapes or if the
@@ -141,8 +145,12 @@ def plot_input_output(
     is_ext_fig = axs_u is not None and axs_y is not None # External figure
     if not is_ext_fig:
         # Create figure and subplots
-        fig, axs_u, axs_y = create_figure_subplots(
-            m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize)
+        fig, axs_u, axs_y = create_figure_subplots(m=m,
+                                                   p=p,
+                                                   figsize=figsize,
+                                                   dpi=dpi,
+                                                   fontsize=fontsize,
+                                                   title=title)
     else:
         # Use figure from the provided axes
         fig = axs_u[0].figure
@@ -367,7 +375,8 @@ def plot_input_output_animation(
     dpi: int = 300,
     interval: int = 10,
     fontsize: int = 12,
-    legend_params: dict[str, Any] = {}
+    legend_params: dict[str, Any] = {},
+    title: Optional[str] = None
 ) -> FuncAnimation:
     """
     Create a Matplotlib animation showing the progression of input-output data
@@ -432,6 +441,7 @@ def plot_input_output_animation(
         legend_params (dict[str, Any]): A dictionary of Matplotlib properties
             for customizing the plot legend (e.g., fontsize, loc,
             handlelength).
+        title (Optional[str]): The title for the created plot figure.
     """
     # Check input-output data dimensions
     if not (u_k.shape[0] == y_k.shape[0]):
@@ -449,7 +459,7 @@ def plot_input_output_animation(
 
     # Create figure and subplots
     fig, axs_u, axs_y = create_figure_subplots(
-        m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize)
+        m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize, title=title)
 
     # Define input-output line lists
     u_lines: List[Line2D] = []
@@ -904,12 +914,17 @@ def create_figure_subplots(
     p: int,
     figsize: Tuple[int, int],
     dpi: int,
-    fontsize: int
+    fontsize: int,
+    title: Optional[str] = None
 ) -> Tuple[Figure, List[Axes], List[Axes]]:
     """
     Create a Matplotlib figure with two rows of subplots: one for control
     inputs and one for system outputs, and return the created figure and
     axes.
+
+    If a title is provided, it will be set as the overall figure title.
+    Each row of subplots will have its own title for 'Control Inputs' and
+    'System Outputs'.
 
     Args:
         m (int): The number of control inputs (subplots in the first row).
@@ -918,6 +933,7 @@ def create_figure_subplots(
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
         fontsize (int): The fontsize for suptitles.
+        title (Optional[str]): The title for the overall figure.
     
     Returns:
         Tuple: A tuple containing:
@@ -926,12 +942,17 @@ def create_figure_subplots(
             - List[Axes]: A list of axes for system outputs subplots.
     """
     # Create figure
-    fig = plt.figure(layout='constrained', figsize=figsize, dpi=dpi)
+    fig = plt.figure(
+        num=title, layout='constrained', figsize=figsize, dpi=dpi)
     
     # Modify constrained layout padding
     fig.set_constrained_layout_pads(
         w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
 
+    # Set overall figure title if provided
+    if title:
+        fig.suptitle(title, fontsize=fontsize + 3, fontweight='bold')
+    
     # Create subfigures for input and output data plots
     subfigs = fig.subfigures(2, 1)
 

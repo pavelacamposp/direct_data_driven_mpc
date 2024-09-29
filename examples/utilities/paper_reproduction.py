@@ -278,7 +278,8 @@ def plot_input_output_reproduction(
     y_ylimits: Optional[List[Tuple[float, float]]],
     figsize: Tuple[int, int] =(14, 8),
     dpi: int = 300,
-    fontsize: int = 12
+    fontsize: int = 12,
+    title: Optional[str] = None
 ) -> None:
     """
     Plot input-output data with setpoints from multiple Data-Driven MPC
@@ -310,6 +311,7 @@ def plot_input_output_reproduction(
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
         fontsize (int): The fontsize for labels, legends and axes ticks.
+        title (Optional[str]): The title for the created plot figure.
     """
     # Retrieve number of input and output data sequences and their length
     m = u_data[0].shape[1] # Number of inputs
@@ -317,7 +319,7 @@ def plot_input_output_reproduction(
 
     # Create example figure subplots
     _, axs_u, axs_y = create_figure_subplots(
-        m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize)
+        m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize, title=title)
 
     # Plot data iterating through each controller scheme
     for i, dd_mpc_scheme in enumerate(data_driven_mpc_controller_schemes):

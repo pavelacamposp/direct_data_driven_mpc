@@ -303,7 +303,8 @@ def main() -> None:
         u_ylimits=u_ylimits,
         y_ylimits=y_ylimits,
         figsize=(12, 8),
-        dpi=100)
+        dpi=100,
+        title="Robust Data-Driven MPC Reproduction")
     
     plt.close() # Close figures
 
