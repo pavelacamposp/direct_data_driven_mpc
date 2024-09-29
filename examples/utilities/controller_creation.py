@@ -284,6 +284,3 @@ def create_data_driven_mpc_controller(
         use_terminal_constraint=use_terminal_constraint)
     
     return direct_data_driven_mpc_controller
-
-if __name__ == "__main__":
-    print(get_data_driven_mpc_controller_params(1,1))
