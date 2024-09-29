@@ -946,8 +946,7 @@ def create_input_output_figure(
         num=title, layout='constrained', figsize=figsize, dpi=dpi)
     
     # Modify constrained layout padding
-    fig.set_constrained_layout_pads(
-        w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
+    fig.get_layout_engine().set(w_pad=0.1, h_pad=0.1, wspace=0.05, hspace=0)
 
     # Set overall figure title if provided
     if title:
