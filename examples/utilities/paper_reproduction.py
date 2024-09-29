@@ -10,7 +10,7 @@ from examples.utilities.controller_creation import (
 from examples.utilities.controller_operation import (
     simulate_data_driven_mpc_control_loop)
 from utilities.data_visualization import (
-    plot_input_output, create_figure_subplots)
+    plot_input_output, create_input_output_figure)
 
 from utilities.model_simulation import LTIModel
 from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
@@ -318,7 +318,7 @@ def plot_input_output_reproduction(
     p = y_data[0].shape[1] # Number of outputs
 
     # Create example figure subplots
-    _, axs_u, axs_y = create_figure_subplots(
+    _, axs_u, axs_y = create_input_output_figure(
         m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize, title=title)
 
     # Plot data iterating through each controller scheme

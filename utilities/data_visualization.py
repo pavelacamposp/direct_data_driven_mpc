@@ -145,12 +145,12 @@ def plot_input_output(
     is_ext_fig = axs_u is not None and axs_y is not None # External figure
     if not is_ext_fig:
         # Create figure and subplots
-        fig, axs_u, axs_y = create_figure_subplots(m=m,
-                                                   p=p,
-                                                   figsize=figsize,
-                                                   dpi=dpi,
-                                                   fontsize=fontsize,
-                                                   title=title)
+        fig, axs_u, axs_y = create_input_output_figure(m=m,
+                                                       p=p,
+                                                       figsize=figsize,
+                                                       dpi=dpi,
+                                                       fontsize=fontsize,
+                                                       title=title)
     else:
         # Use figure from the provided axes
         fig = axs_u[0].figure
@@ -458,7 +458,7 @@ def plot_input_output_animation(
     T = u_k.shape[0] # Length of data
 
     # Create figure and subplots
-    fig, axs_u, axs_y = create_figure_subplots(
+    fig, axs_u, axs_y = create_input_output_figure(
         m=m, p=p, figsize=figsize, dpi=dpi, fontsize=fontsize, title=title)
 
     # Define input-output line lists
@@ -909,7 +909,7 @@ def remove_legend_duplicates(
     # Update the legend with the unique handles and labels
     axis.legend(by_label.values(), by_label.keys(), **legend_params)
 
-def create_figure_subplots(
+def create_input_output_figure(
     m: int,
     p: int,
     figsize: Tuple[int, int],
