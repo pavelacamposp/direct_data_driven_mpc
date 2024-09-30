@@ -28,7 +28,7 @@ SETPOINT_LINE_SMALL_PARAMS['linewidth'] = 1.5
 # Define general Matplotlib legend parameters
 LEGEND_PARAMS = {
     'fontsize': 10,
-    'handlelength': 2.7,
+    'handlelength': 2.9,
     'labelspacing': 0.2,
     'borderpad': 0.4,
     'fancybox': False,
