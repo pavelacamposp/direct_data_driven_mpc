@@ -29,6 +29,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import math
 
 from examples.utilities.controller_creation import (
     get_data_driven_mpc_controller_params, create_data_driven_mpc_controller)
@@ -67,11 +68,12 @@ default_controller_config_path = os.path.join(controller_config_dir,
                                               default_controller_config_file)
 default_controller_key_value = 'data_driven_mpc_params'
 
-# Animation video default parameters
-default_video_name = "data-driven_mpc_sim.mp4"
-default_video_path = os.path.join(default_animation_dir, default_video_name)
-default_video_fps = 200
-default_video_bitrate = 4500
+# Animation default parameters
+default_anim_name = "data-driven_mpc_sim.gif"
+default_anim_path = os.path.join(default_animation_dir, default_anim_name)
+default_anim_fps = 50.0
+default_anim_bitrate = 4500
+default_anim_points_per_frame = 5
 
 # Data-Driven MPC controller parameters
 controller_type_mapping = {
@@ -135,19 +137,32 @@ def parse_args() -> argparse.Namespace:
                         "initialization to ensure reproducible results. "
                         "Defaults to `None`.")
     # Animation video output arguments
-    parser.add_argument("--save_video", action='store_true', default=False,
-                        help="Save generated animation as a video in an .mp4 "
-                        "file using ffmpeg.")
-    parser.add_argument("--video_path", type=str,
-                        default=default_video_path,
-                        help="Saving path for the generated animation file. "
-                        "Includes file name with .mp4 extension.")
-    parser.add_argument("--video_fps", type=int,
-                        default=default_video_fps,
-                        help="Frames per second value for the saved video.")
-    parser.add_argument("--video_bitrate", type=int,
-                        default=default_video_bitrate,
-                        help="Bitrate value for the saved video.")
+    parser.add_argument("--save_anim", action='store_true', default=False,
+                        help="If passed, save the generated animation to a "
+                        "file using ffmpeg. The file format is specified by "
+                        "the `anim_path` argument value.")
+    parser.add_argument("--anim_path", type=str,
+                        default=default_anim_path,
+                        help="The saving path for the generated animation "
+                        "file. Includes the file name and its extension "
+                        "(e.g., 'data-driven_mpc_sim.gif' or "
+                        "'data-driven_mpc_sim.mp4'). Defaults to "
+                        "'animation_outputs/data-driven_mpc_sim.gif'")
+    parser.add_argument("--anim_fps", type=float,
+                        default=default_anim_fps,
+                        help="The frames per second value for the saved "
+                        "video. Defaults to 50.")
+    parser.add_argument("--anim_bitrate", type=int,
+                        default=default_anim_bitrate,
+                        help="The bitrate value for the saved video "
+                        "(relevant for video formats like .mp4). Defaults to "
+                        "4500.")
+    parser.add_argument("--anim_points_per_frame", type=int,
+                        default=default_anim_points_per_frame,
+                        help="The number of data points shown per animation "
+                        "frame. Increasing this value reduces the number of "
+                        "animation frames required to display all the data. "
+                        "Defaults to 5 points per frame.")
     # Verbose argument
     parser.add_argument("--verbose", type=int, default=2,
                         choices=[0, 1, 2],
@@ -182,10 +197,11 @@ def main() -> None:
     seed = args.seed
 
     # Animation video output arguments
-    save_video = args.save_video
-    video_path = args.video_path
-    video_fps = args.video_fps
-    video_bitrate = args.video_bitrate
+    save_anim = args.save_anim
+    anim_path = args.anim_path
+    anim_fps = args.anim_fps
+    anim_bitrate = args.anim_bitrate
+    anim_points_per_frame = args.anim_points_per_frame
 
     # Verbose argument
     verbose = args.verbose
@@ -395,35 +411,42 @@ def main() -> None:
     if verbose:
         print("Displaying animation from extended input-output data")
     
-    ani = plot_input_output_animation(u_k=U,
-                                      y_k=Y,
-                                      u_s=u_s,
-                                      y_s=y_s,
-                                      initial_steps=N,
-                                      figsize=(14, 8),
-                                      dpi=100,
-                                      interval=1,
-                                      title=plot_title,
-                                      **INPUT_OUTPUT_PLOT_PARAMS_SMALL)
+    anim = plot_input_output_animation(u_k=U,
+                                       y_k=Y,
+                                       u_s=u_s,
+                                       y_s=y_s,
+                                       initial_steps=N,
+                                       figsize=(14, 8),
+                                       dpi=100,
+                                       interval=1000/anim_fps,
+                                       points_per_frame=anim_points_per_frame,
+                                       title=plot_title,
+                                       **INPUT_OUTPUT_PLOT_PARAMS_SMALL)
     plt.show() # Show animation
     
-    if save_video:
+    if save_anim:
+        # Calculate the number of total animation frames
+        data_length = N + n_steps
+        anim_frames = math.ceil((data_length - 1) / anim_points_per_frame) + 1
+
         if verbose:
-            print("Saving extended input-output animation as an MP4 video")
+            print("Saving extended input-output animation to file")
             if verbose > 1:
-                print(f"    Saving video to: {video_path}")
-                print(f"    Video FPS: {video_fps}, Bitrate: "
-                      f"{video_bitrate}, Total Frames: {N + n_steps}")
+                print(f"    Saving animation to: {anim_path}")
+                print(f"    Animation FPS: {anim_fps}, Bitrate: "
+                      f"{anim_bitrate} (video only), Data Length: "
+                      f"{data_length}, Points per Frame: "
+                      f"{anim_points_per_frame}, Total Frames: {anim_frames}")
         
         # Save input-output animation as an MP4 video
-        save_animation(animation=ani,
-                       total_frames=N + n_steps,
-                       fps=video_fps,
-                       bitrate=video_bitrate,
-                       file_path=video_path)
+        save_animation(animation=anim,
+                       total_frames=anim_frames,
+                       fps=anim_fps,
+                       bitrate=anim_bitrate,
+                       file_path=anim_path)
         
         if verbose:
-            print("Animation MP4 video saved successfully")
+            print("Animation file saved successfully")
 
     plt.close() # Close figures
 
