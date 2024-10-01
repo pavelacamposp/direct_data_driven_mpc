@@ -3,19 +3,29 @@ Robust Data-Driven Model Predictive Control (MPC) Reproduction
 
 This script implements a reproduction of the example presented by J. Berberich
 et al. in Section V of [1], which illustrates various Robust Data-Driven MPC
-controller schemes applied to a four-tank system model. The implementation
-uses the parameters defined in the example, including those for the system
-model, the initial input-output data generation, and the Data-Driven MPC
-controller setup. Additionally, the initial output of the system is set to
-`y_0 = [0.4, 0.4]` to reproduce the closed-loop output graphs shown in Fig. 2 of
-[1].
+controller schemes applied to a four-tank system model. The implemented
+controller schemes are:
+    - 1-step Robust Data-Driven MPC scheme with terminal equality constraints
+        (TEC)
+    - n-step Robust Data-Driven MPC scheme  with terminal equality constraints
+        (TEC, n-step)
+    - 1-step Robust Data-Driven MPC scheme without terminal equality
+        constraints (UCON)
 
-We provide a default seed for the random number generator to closely match the
-results presented in the example. This seed can be modified through argument
-parsing. However, since the closed loop of the Robust Data-Driven MPC scheme
-without terminal equality constraints is unstable and diverges, using
-different seeds might result in infeasible solutions for its MPC problem. The
-other schemes with terminal equality constraints do not present this issue.
+The implementation uses the parameters defined in the paper example, including
+those for the system model, the initial input-output data generation, and the
+Data-Driven MPC controller setup. Additionally, the initial output of the
+system is set to `y_0 = [0.4, 0.4]` to reproduce the closed-loop output graphs
+shown in Fig. 2 of [1].
+
+Notes:
+    A default seed is provided for the random number generator to closely
+    match the results presented in the example. This seed can be modified
+    through argument parsing; however, since the closed loop of the Robust
+    Data-Driven MPC scheme without terminal equality constraints is unstable
+    and diverges, using different seeds might result in infeasible solutions.
+    In contrast, the schemes with terminal equality constraints do not exhibit
+    this issue.
 
 References:
     [1] J. Berberich, J. Köhler, M. A. Müller and F. Allgöwer, "Data-Driven
