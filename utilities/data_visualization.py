@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from tqdm import tqdm
 import os
+import math
 
 def plot_input_output(
     u_k: np.ndarray,
@@ -373,7 +374,8 @@ def plot_input_output_animation(
     display_control_text: bool = True,
     figsize: Tuple[int, int] = (12, 8),
     dpi: int = 300,
-    interval: int = 10,
+    interval: float = 20.0,
+    points_per_frame: int = 1,
     fontsize: int = 12,
     legend_params: dict[str, Any] = {},
     title: Optional[str] = None
@@ -388,6 +390,12 @@ def plot_input_output_animation(
     its setpoint as a constant line. The appearance of plot lines can be
     customized by passing dictionaries of Matplotlib line properties like
     color, linestyle, and linewidth.
+
+    The number of data points shown in each animation frame and the animation
+    speed can be configured via the `points_per_frame` and `interval`
+    parameters, respectively. These paramaters allow control over the speed
+    at which data is shown in the animation, as well as the total number of
+    animation frames required to display all the data.
 
     If provided, the first 'initial_steps' time steps can be highlighted to
     emphasize the initial input-output data measurement period representing
@@ -436,12 +444,21 @@ def plot_input_output_animation(
         figsize (Tuple[int, int]): The (width, height) dimensions of the
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
-        interval (int): The time between frames in milliseconds.
+        interval (float): The time between frames in milliseconds. Defaults
+            to 20 ms.
+        points_per_frame (int): The number of data points shown per animation
+            frame. Increasing this value reduces the number of frames required
+            to display all the data, resulting in faster data transitions.
+            Defaults to 1.
         fontsize (int): The fontsize for labels and axes ticks.
         legend_params (dict[str, Any]): A dictionary of Matplotlib properties
             for customizing the plot legend (e.g., fontsize, loc,
             handlelength).
         title (Optional[str]): The title for the created plot figure.
+    
+    Returns:
+        FuncAnimation: A Matplotlib `FuncAnimation` object that animates the
+            progression of input-output data over time.
     """
     # Check input-output data dimensions
     if not (u_k.shape[0] == y_k.shape[0]):
@@ -540,11 +557,16 @@ def plot_input_output_animation(
 
     # Animation update function
     def update(frame):
+        # Calculate the current index based on the number of points per frame,
+        # ensuring it does not exceed the last valid data index
+        current_index = min(frame * points_per_frame, T - 1)
+
         # Update input plot data
         for i in range(m):
-            update_data_animation(frame=frame,
-                                  data=u_k[:frame+1, i],
+            update_data_animation(index=current_index,
+                                  data=u_k[:current_index + 1, i],
                                   data_length=T,
+                                  points_per_frame=points_per_frame,
                                   initial_steps=initial_steps,
                                   line=u_lines[i],
                                   rect=u_rects[i],
@@ -559,9 +581,10 @@ def plot_input_output_animation(
         
         # Update output plot data
         for j in range(p):
-            update_data_animation(frame=frame,
-                                  data=y_k[:frame+1, j],
+            update_data_animation(index=current_index,
+                                  data=y_k[:current_index + 1, j],
                                   data_length=T,
+                                  points_per_frame=points_per_frame,
                                   initial_steps=initial_steps,
                                   line=y_lines[j],
                                   rect=y_rects[j],
@@ -578,9 +601,12 @@ def plot_input_output_animation(
                 u_init_texts + u_control_texts + y_rects +
                 y_init_texts + y_control_texts + y_rect_lines)
 
+    # Calculate the number of animation frames
+    n_frames = math.ceil((T - 1) / points_per_frame)  + 1
+
     # Create animation
     animation = FuncAnimation(
-        fig, update, frames=T, interval=interval, blit=True)
+        fig, update, frames=n_frames, interval=interval, blit=True)
 
     return animation
 
@@ -710,9 +736,10 @@ def initialize_data_animation(
                                                     edgecolor='black')))
 
 def update_data_animation(
-    frame: int,
+    index: int,
     data: np.ndarray,
     data_length: int,
+    points_per_frame: int,
     initial_steps: Optional[int],
     line: Line2D,
     rect: Rectangle,
@@ -728,7 +755,7 @@ def update_data_animation(
     """
     Update the plot elements in a data series animation with setpoints.
 
-    This function updates the data plot line for each animation frame.
+    This function updates data plot elements based on the current data index.
     If 'initial_steps' is provided, it also updates the rectangle and line
     representing the initial input-output measurement period, as well as the
     text labels indicating the initial measurement and control periods. These
@@ -736,9 +763,11 @@ def update_data_animation(
     overlapping with other plot elements.
 
     Args:
-        frame (int): The current animation frame.
+        index (int): The current data index.
         data (np.ndarray): An array containing data to be plotted.
         data_length (int): The length of the `data` array.
+        points_per_frame (int): The number of data points shown per animation
+            frame.
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
@@ -763,23 +792,25 @@ def update_data_animation(
             in data coordinates.
     """
     # Update plot line data
-    line.set_data(range(0, frame+1), data[:frame+1])
+    line.set_data(range(0, index + 1), data[:index + 1])
     
     # Update initial measurement rectangle and texts
-    if initial_steps and frame <= initial_steps:
+    if initial_steps and index <= initial_steps + points_per_frame:
+        # Calculate measurement period limit index
+        lim_index = index if index <= initial_steps else initial_steps
         # Update rectangle width
-        rect.set_width(frame)
+        rect.set_width(lim_index)
         # Hide initial measurement and control texts
         init_text_obj.set_visible(False)
         control_text_obj.set_visible(False)
         # Update rectangle limit line position
-        rect_line.set_xdata([frame])
+        rect_line.set_xdata([lim_index])
         # Show initial measurement text
-        if display_initial_text and frame >= init_text_width:
-            init_text_obj.set_position((frame / 2, y_axis_center))
+        if display_initial_text and index >= init_text_width:
+            init_text_obj.set_position((lim_index / 2, y_axis_center))
             init_text_obj.set_visible(True)
         # Show control text if possible
-        if display_control_text and frame == initial_steps:
+        if display_control_text and index >= initial_steps:
             if (data_length - initial_steps) >= control_text_width:
                 control_text_obj.set_visible(True)
 
