@@ -1003,8 +1003,8 @@ def create_input_output_figure(
                         fontweight='bold')
     
     # Create subplots
-    axs_u = subfigs[0].subplots(1, max(m, p))
-    axs_y = subfigs[1].subplots(1, max(m, p))
+    axs_u = subfigs[0].subplots(1, m)
+    axs_y = subfigs[1].subplots(1, p)
 
     # Ensure axs_u and axs_y are always lists
     if max(m, p) == 1:
