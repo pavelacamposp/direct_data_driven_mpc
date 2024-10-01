@@ -43,9 +43,8 @@ def plot_input_output(
     This function creates 2 rows of subplots, with the first row containing
     control inputs, and the second row, system outputs. Each subplot shows the
     data series for each data sequence alongside its setpoint as a constant
-    line. The appearance of plot lines can be customized by passing
-    dictionaries of Matplotlib line properties like color, linestyle, and
-    linewidth.
+    line. The appearance of plot lines and legends can be customized by
+    passing dictionaries of Matplotlib line and legend properties.
 
     If provided, the first 'initial_steps' time steps are highlighted to
     emphasize the initial input-output data measurement period representing
@@ -85,7 +84,8 @@ def plot_input_output(
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
-            measurement period in the plot.
+            measurement period in the plot. If `None`, no special highlighting
+            will be applied.
         initial_excitation_text (str): Label text to display over the initial
             excitation period of the input plots. Default is
             "Init. Excitation".
@@ -114,7 +114,7 @@ def plot_input_output(
         axs_y (Optional[List[Axes]]): List of external axes for output plots.
         title (Optional[str]): The title for the created plot figure. Set
             only if the figure is created internally (i.e., `axs_u` and
-            `axs_y` are not provided).
+            `axs_y` are not provided). If `None`, no title will be displayed.
     
     Raises:
         ValueError: If any array dimensions mismatch expected shapes or if the
@@ -249,8 +249,8 @@ def plot_data(
     space to prevent them from overlapping with other plot elements.
 
     Note:
-        The appearance of plot lines can be customized by passing dictionaries
-        of Matplotlib line properties like color, linestyle, and linewidth.
+        The appearance of plot lines and legend can be customized by passing
+        dictionaries of Matplotlib line and legend properties.
 
     Args:
         axis (Axes): The Matplotlib axis object to plot on.
@@ -387,9 +387,9 @@ def plot_input_output_animation(
     This function generates a figure with two rows of subplots: the top
     subplots display control inputs and the bottom subplots display system
     outputs. Each subplot shows the data series for each sequence alongside
-    its setpoint as a constant line. The appearance of plot lines can be
-    customized by passing dictionaries of Matplotlib line properties like
-    color, linestyle, and linewidth.
+    its setpoint as a constant line. The appearance of plot lines and legends
+    can be customized by passing dictionaries of Matplotlib line and legend
+    properties.
 
     The number of data points shown in each animation frame and the animation
     speed can be configured via the `points_per_frame` and `interval`
@@ -428,7 +428,8 @@ def plot_input_output_animation(
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
-            measurement period in the plot.
+            measurement period in the plot. If `None`, no special highlighting
+            will be applied.
         initial_excitation_text (str): Label text to display over the initial
             excitation period of the input plots. Default is
             "Init. Excitation".
@@ -454,7 +455,8 @@ def plot_input_output_animation(
         legend_params (dict[str, Any]): A dictionary of Matplotlib properties
             for customizing the plot legend (e.g., fontsize, loc,
             handlelength).
-        title (Optional[str]): The title for the created plot figure.
+        title (Optional[str]): The title for the created plot figure. If
+            `None`, no title will be displayed.
     
     Returns:
         FuncAnimation: A Matplotlib `FuncAnimation` object that animates the
@@ -639,9 +641,9 @@ def initialize_data_animation(
     as plot lines representing data, rectangles and lines representing an
     initial input-output data measurement period, and text labels for both the
     initial measurement and control periods. It also adjusts the axis limits
-    and stores the y-axis center values. The appearance of plot lines can be
-    customized by passing dictionaries of Matplotlib line properties like
-    color, linestyle, and linewidth.
+    and stores the y-axis center values. The appearance of plot lines and
+    legends can be customized by passing dictionaries of Matplotlib line and
+    legend properties.
 
     Args:
         axis (Axes): The Matplotlib axis object to plot on.
@@ -662,7 +664,8 @@ def initialize_data_animation(
         initial_steps (Optional[int]): The number of initial time steps where
             input-output measurements were taken for the data-driven
             characterization of the system. This will highlight the initial
-            measurement period in the plot.
+            measurement period in the plot. If `None`, no special highlighting
+            will be applied.
         initial_text (str): Label text to display over the initial measurement
             period of the plot.
         control_text (str): Label text to display over the post-initial
@@ -920,6 +923,10 @@ def remove_legend_duplicates(
     Remove duplicate entries from the legend of a Matplotlib axis. Optionally,
     move a specified label to the end of the legend.
 
+    Note:
+        The appearance of the plot legend can be customized by passing a
+        dictionary of Matplotlib legend properties.
+
     Args:
         axis (Axes): The Matplotlib axis containing the legend to modify.
         legend_params (dict[str, Any]): A dictionary of Matplotlib properties
@@ -964,7 +971,8 @@ def create_input_output_figure(
             created Matplotlib figure.
         dpi (int): The DPI resolution of the figure.
         fontsize (int): The fontsize for suptitles.
-        title (Optional[str]): The title for the overall figure.
+        title (Optional[str]): The title for the overall figure. If `None`,
+            no title will be added.
     
     Returns:
         Tuple: A tuple containing:
