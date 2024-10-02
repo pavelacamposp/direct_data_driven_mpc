@@ -215,8 +215,8 @@ def main() -> None:
     # to this state.
     # 
     # This is only used for reproduction and does not represent the typical
-    # operation of a Data-Driven MPC controller, as this type of controllers
-    # are designed to control unknown systems without prior system
+    # operation of a Direct Data-Driven MPC controller, as this type of
+    # controllers are designed to control unknown systems without prior system
     # identification.
     
     # Estimate the initial state from equilibrium input-output trajectory
