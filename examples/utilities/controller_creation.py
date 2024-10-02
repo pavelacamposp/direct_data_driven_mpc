@@ -52,7 +52,6 @@ def get_data_driven_mpc_controller_params(
     controller_key_value: str,
     m: int,
     p: int,
-    eps_bar: Optional[float] = None,
     verbose: int = 0
 ) -> DataDrivenMPCParamsDictType:
     """
@@ -62,9 +61,7 @@ def get_data_driven_mpc_controller_params(
     The controller parameters are defined based on the Nominal and Robust
     Data-Driven MPC controller formulations from [1]. The number of control
     inputs (`m`) and system outputs (`p`) are used to construct the output
-    (`Q`) and input (`R`) weighting matrices. If `eps_bar` is provided, it
-    overrides the estimated upper bound of the system measurement noise from
-    the configuration file.
+    (`Q`) and input (`R`) weighting matrices.
 
     Args:
         config_file (str): The path to the YAML configuration file.
@@ -72,9 +69,6 @@ def get_data_driven_mpc_controller_params(
             parameters in the config file.
         m (int): The number of control inputs.
         p (int): The number of system outputs.
-        eps_bar (Optional[float]): The estimated upper bound of the system
-            measurement noise. If provided, it overrides the corresponding
-            value from the configuration file. Defaults to `None`.
         verbose (int): The verbosity level: 0 = no output, 1 = minimal
                 output, 2 = detailed output.
     
@@ -123,11 +117,6 @@ def get_data_driven_mpc_controller_params(
     dd_mpc_params['n'] = n
     # Estimated upper bound of the system measurement noise
     eps_max = params['epsilon_bar']
-    if eps_bar is not None:
-        # Override `eps_max` if passed
-        eps_max = eps_bar
-        if verbose > 1:
-            print(f"    Controller `eps_max` parameter set to: {eps_bar}")
     dd_mpc_params['eps_max'] = eps_max
     # Prediction horizon
     L = params['L']

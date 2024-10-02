@@ -123,13 +123,6 @@ def parse_args() -> argparse.Namespace:
                         choices=["None", "Convex", "NonConvex"],
                         help="The constraint type for the slack variable "
                         "`sigma` in a Robust Data-Driven MPC formulation.")
-    parser.add_argument("--eps_max", type=float, default=None,
-                        help="The estimated upper bound of the system "
-                        "measurement noise. If set to zero, disables system "
-                        "noise and sets a high value for the ridge "
-                        "regularization base weight for alpha (`lamb_alpha`) "
-                        "parameter to prevent division by zero for a Robust "
-                        "Data-Driven MPC controller.")
     parser.add_argument("--t_sim", type=int, default=default_t_sim,
                         help="The simulation length in time steps.")
     parser.add_argument("--seed", type=int, default=None,
@@ -189,7 +182,6 @@ def main() -> None:
     n_mpc_step = args.n_mpc_step
     controller_type_arg = args.controller_type
     slack_var_const_type_arg = args.slack_var_const_type
-    eps_max = args.eps_max
 
     # Simulation parameters
     t_sim = args.t_sim
@@ -217,26 +209,6 @@ def main() -> None:
                                   model_key_value=model_key_value,
                                   verbose=verbose)
 
-    # Override model parameters with parsed arguments
-    if (eps_max is not None):
-        if verbose:
-            print("Overriding model parameters")
-
-    # Override the upper bound of the system measurement noise
-    # with parsed argument if passed
-    if eps_max is not None:
-        system_model.set_eps_max(eps_max=eps_max)
-
-        if verbose > 1:
-            if eps_max == 0:
-                print("    System set to ideal, noise-free conditions")
-            else:
-                print("    Upper bound of system measurement noise set to: "
-                      f"{eps_max}")
-    
-    # If set to zero, the system is considered ideal with noise-free
-    # conditions, enabling testing of the Nominal Data-Driven MPC controller
-
     # --- Define Data-Driven MPC Controller Parameters ---
     if verbose:
         print("Loading Data-Driven MPC controller parameters from "
@@ -250,7 +222,6 @@ def main() -> None:
         controller_key_value=controller_key_value,
         m=m,
         p=p,
-        eps_bar=eps_max,
         verbose=verbose)
     
     # Override controller parameters with parsed arguments
