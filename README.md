@@ -16,6 +16,11 @@ A **direct data-driven controller** maps measured input-output data from an unkn
 - [Usage](#usage)
 - [Paper Reproduction](#paper-reproduction)
 - [Code Structure](#code-structure)
+  - [Direct Data-Driven MPC Controller](#direct-data-driven-mpc-controller)
+  - [Simulation](#simulation)
+  - [Visualization](#visualization-static-and-animated-plots)
+  - [Examples](#examples)
+  - [Configuration Files](#configuration-files)
 - [License](#license)
 - [Citation](#citation)
 
