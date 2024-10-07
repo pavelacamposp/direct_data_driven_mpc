@@ -100,33 +100,33 @@ The figure below shows the expected output from executing this script. The contr
 
 ### Direct Data-Driven MPC Controller
 The project is structured as a Python package, encapsulating the **Data-Driven Model Predictive Control (MPC)** controller logic within the `DirectDataDrivenMPCController` class. This class implements a controller based on the **Nominal** and **Robust** Data-Driven MPC schemes described in the paper, ensuring that the stability and robustness guarantees are maintained by validating that the controller parameters satisfy the required assumptions and conditions.
-- `direct_data_driven_mpc/direct_data_driven_mpc_controller.py`: Implements the main Data-Driven MPC controller in the `DirectDataDrivenMPCController` class.
-- `direct_data_driven_mpc/utilities/hankel_matrix.py`: Provides functions for constructing Hankel matrices and evaluating whether data sequences are persistently exciting of a given order.
+- [`direct_data_driven_mpc/direct_data_driven_mpc_controller.py`](direct_data_driven_mpc/direct_data_driven_mpc_controller.py): Implements the main Data-Driven MPC controller in the `DirectDataDrivenMPCController` class.
+- [`direct_data_driven_mpc/utilities/hankel_matrix.py`](direct_data_driven_mpc/utilities/hankel_matrix.py): Provides functions for constructing Hankel matrices and evaluating whether data sequences are persistently exciting of a given order.
 
 ### Simulation
 The `LTIModel` class is implemented to simulate Linear Time-Invariant (LTI) systems, and the `LTISystemModel` class to create `LTIModel` instances using system parameters from YAML configuration files.
-- `utilities/model_simulation.py`: Implements the `LTIModel` and `LTISystemModel` classes.
-- `utilities/initial_state_estimation.py`: Provides functions to estimate the initial state of an LTI model and calculate its equilibrium input-output pairs. These functions are integrated into `LTIModel` and are used for reproducing the paper's results.
+- [`utilities/model_simulation.py`](utilities/model_simulation.py): Implements the `LTIModel` and `LTISystemModel` classes.
+- [`utilities/initial_state_estimation.py`](utilities/initial_state_estimation.py): Provides functions to estimate the initial state of an LTI model and calculate its equilibrium input-output pairs. These functions are integrated into `LTIModel` and are used for reproducing the paper's results.
 
 ### Visualization (Static and Animated Plots)
-Custom functions are implemented in `utilities/visualization/data_visualization.py` to display input-output data in static and animated plots. These functions use Matplotlib for visualization and FFMPEG for saving animations in various formats (e.g., GIF, MP4).
+Custom functions are implemented in [`utilities/visualization/data_visualization.py`](utilities/visualization/data_visualization.py) to display input-output data in static and animated plots. These functions use Matplotlib for visualization and FFMPEG for saving animations in various formats (e.g., GIF, MP4).
 
 ### Examples
 The `examples` directory includes scripts to demonstrate the operation of the Data-Driven MPC controller and reproduce the results presented in the paper.
-- `examples/direct_data_driven_mpc_example.py`: Demonstrates the setup, simulation, and data visualization of a Direct Data-Driven MPC controller applied to a system.
-- `examples/robust_data_driven_mpc_reproduction.py`: Implements a reproduction of the example presented in the paper.
+- [`examples/direct_data_driven_mpc_example.py`](examples/direct_data_driven_mpc_example.py): Demonstrates the setup, simulation, and data visualization of a Direct Data-Driven MPC controller applied to a system.
+- [`examples/robust_data_driven_mpc_reproduction.py`](examples/robust_data_driven_mpc_reproduction.py): Implements a reproduction of the example presented in the paper.
 
 To modularize the controller creation and operation, the following utility modules are used:
-- `utilities/controller/controller_creation.py`: Provides functions for loading controller parameters from YAML configuration files and creating controller instances.
-- `utilities/controller/controller_operation.py`: Manages the model simulation for a typical Data-Driven MPC controller operation, such as randomizing the system's initial state, generating input-output data, and simulating the controller's closed-loop.
-- `utilities/reproduction/paper_reproduction.py`: Extends the controller creation and operation utility modules to implement the reproduction script.
+- [`utilities/controller/controller_creation.py`](utilities/controller/controller_creation.py): Provides functions for loading controller parameters from YAML configuration files and creating controller instances.
+- [`utilities/controller/controller_operation.py`](utilities/controller/controller_operation.py): Manages the model simulation for a typical Data-Driven MPC controller operation, such as randomizing the system's initial state, generating input-output data, and simulating the controller's closed-loop.
+- [`utilities/reproduction/paper_reproduction.py`](utilities/reproduction/paper_reproduction.py): Extends the controller creation and operation utility modules to implement the reproduction script.
 
 ### Configuration Files
 The system and controller parameters used in the example and reproduction scripts are defined in YAML configuration files in the `examples/config` directory. These parameters are based on the example in Section V of the paper.
-- `examples/config/controllers/data_driven_mpc_example_params.yaml`: Defines Data-Driven MPC controller parameters.
-- `examples/config/models/four_tank_system_params.yaml`: Contains the system model parameters of a linearized version of a four-tank system.
+- [`examples/config/controllers/data_driven_mpc_example_params.yaml`](examples/config/controllers/data_driven_mpc_example_params.yaml): Defines Data-Driven MPC controller parameters.
+- [`examples/config/models/four_tank_system_params.yaml`](examples/config/models/four_tank_system_params.yaml): Contains the system model parameters of a linearized version of a four-tank system.
 
-A YAML loading function is provided in  `utilities/yaml_config_loading.py`.
+A YAML loading function is provided in  [`utilities/yaml_config_loading.py`](utilities/yaml_config_loading.py).
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
