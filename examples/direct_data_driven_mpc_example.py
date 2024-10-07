@@ -31,13 +31,13 @@ import matplotlib.pyplot as plt
 import os
 import math
 
-from examples.utilities.controller_creation import (
+from utilities.controller.controller_creation import (
     get_data_driven_mpc_controller_params, create_data_driven_mpc_controller)
-from examples.utilities.controller_operation import (
+from utilities.controller.controller_operation import (
     randomize_initial_system_state, generate_initial_input_output_data,
     simulate_data_driven_mpc_control_loop)
 
-from utilities.data_visualization import (
+from utilities.visualization.data_visualization import (
     plot_input_output, plot_input_output_animation, save_animation)
 
 from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
@@ -45,7 +45,7 @@ from direct_data_driven_mpc.direct_data_driven_mpc_controller import (
 
 from utilities.model_simulation import LTISystemModel
 
-from examples.utilities.plot_styles import (
+from utilities.visualization.plot_styles import (
     INPUT_OUTPUT_PLOT_PARAMS, INPUT_OUTPUT_PLOT_PARAMS_SMALL)
 
 # Directory paths

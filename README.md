@@ -109,7 +109,7 @@ The `LTIModel` class is implemented to simulate Linear Time-Invariant (LTI) syst
 - `utilities/initial_state_estimation.py`: Provides functions to estimate the initial state of an LTI model and calculate its equilibrium input-output pairs. These functions are integrated into `LTIModel` and are used for reproducing the paper's results.
 
 ### Visualization (Static and Animated Plots)
-Custom functions are implemented in `utilities/data_visualization.py` to display input-output data in static and animated plots. These functions use Matplotlib for visualization and FFMPEG for saving animations in various formats (e.g., GIF, MP4).
+Custom functions are implemented in `utilities/visualization/data_visualization.py` to display input-output data in static and animated plots. These functions use Matplotlib for visualization and FFMPEG for saving animations in various formats (e.g., GIF, MP4).
 
 ### Examples
 The `examples` directory includes scripts to demonstrate the operation of the Data-Driven MPC controller and reproduce the results presented in the paper.
@@ -117,9 +117,9 @@ The `examples` directory includes scripts to demonstrate the operation of the Da
 - `examples/robust_data_driven_mpc_reproduction.py`: Implements a reproduction of the example presented in the paper.
 
 To modularize the controller creation and operation, the following utility modules are used:
-- `examples/utilities/controller_creation.py`: Provides functions for loading controller parameters from YAML configuration files and creating controller instances.
-- `examples/utilities/controller_operation.py`: Manages the model simulation for a typical Data-Driven MPC controller operation, such as randomizing the system's initial state, generating input-output data, and simulating the controller's closed-loop.
-- `examples/utilities/paper_reproduction.py`: Extends the controller creation and operation utility modules to implement the reproduction script.
+- `utilities/controller/controller_creation.py`: Provides functions for loading controller parameters from YAML configuration files and creating controller instances.
+- `utilities/controller/controller_operation.py`: Manages the model simulation for a typical Data-Driven MPC controller operation, such as randomizing the system's initial state, generating input-output data, and simulating the controller's closed-loop.
+- `utilities/reproduction/paper_reproduction.py`: Extends the controller creation and operation utility modules to implement the reproduction script.
 
 ### Configuration Files
 The system and controller parameters used in the example and reproduction scripts are defined in YAML configuration files in the `examples/config` directory. These parameters are based on the example in Section V of the paper.

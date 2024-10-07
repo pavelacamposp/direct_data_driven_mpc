@@ -40,12 +40,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-from examples.utilities.controller_creation import (
+from utilities.controller.controller_creation import (
     get_data_driven_mpc_controller_params)
-from examples.utilities.controller_operation import (
+from utilities.controller.controller_operation import (
     randomize_initial_system_state, simulate_n_input_output_measurements,
     generate_initial_input_output_data)
-from examples.utilities.paper_reproduction import (
+from utilities.reproduction.paper_reproduction import (
     DataDrivenMPCScheme, get_equilibrium_state_from_output,
     create_data_driven_mpc_controllers_reproduction,
     simulate_data_driven_mpc_control_loops_reproduction,
