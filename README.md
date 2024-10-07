@@ -12,6 +12,7 @@ A **direct data-driven controller** maps measured input-output data from an unkn
 
 
 ## Table of Contents
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Paper Reproduction](#paper-reproduction)
@@ -23,6 +24,20 @@ A **direct data-driven controller** maps measured input-output data from an unkn
   - [Configuration Files](#configuration-files)
 - [License](#license)
 - [Citation](#citation)
+
+## Requirements
+This package requires the following:
+- **Python** (>=3.8, <3.13). Python 3.13 is not fully supported, as some dependencies have not been compiled for this version yet. We recommend using Python 3.8 to 3.12.
+- **FFmpeg**: Required for saving animations (e.g., GIF or MP4).
+    - **On Windows**: You can download FFmpeg from [the official FFmpeg website](https://ffmpeg.org/download.html). Ensure it's correctly added to your system's `PATH`.
+    - **On Unix**: You can install it using your package manager. For Debian/Ubuntu:
+        ```bash
+        sudo apt install ffmpeg
+        ```
+    Verify the installation by running this command:
+    ```bash
+    ffmpeg -version
+    ```
 
 ## Installation
 Follow these steps to create a virtual environment and install this package:
@@ -70,13 +85,16 @@ To run the example script with a `seed` of `0`, simulation length of `400` steps
 ```bash
 python examples/direct_data_driven_mpc_example.py --seed 0 --t_sim 400 --save_anim
 ```
+> [!NOTE]
+> The `--save_anim` flag requires FFmpeg to be installed. See the [Requirements](#requirements) section for more details.
+
 Some key arguments are listed below:
 Argument | Type | Description
 --- | --- | ---
 `--model_config_path` | `str` | Path to the YAML file containing the model parameters.
 `--controller_config_path` | `str` | Path to the YAML file containing the Data-Driven MPC controller parameters.
 `--t_sim` | `int` | Simulation length in time steps.
-`--save_anim` | `flag` | If passed, saves the generated animation to a file using FFMPEG.
+`--save_anim` | `flag` | If passed, saves the generated animation to a file using FFmpeg.
 `--anim_path` | `str` | Path where the generated animation file will be saved. Includes the file name and its extension (e.g., `data-driven_mpc_sim.gif`).
 `--verbose` | `int` | Verbosity level: `0` = no output, `1` = minimal output, `2` = detailed output.
 
@@ -114,7 +132,7 @@ The `LTIModel` class is implemented to simulate Linear Time-Invariant (LTI) syst
 - [`utilities/initial_state_estimation.py`](utilities/initial_state_estimation.py): Provides functions to estimate the initial state of an LTI model and calculate its equilibrium input-output pairs. These functions are integrated into `LTIModel` and are used for reproducing the paper's results.
 
 ### Visualization (Static and Animated Plots)
-Custom functions are implemented in [`utilities/visualization/data_visualization.py`](utilities/visualization/data_visualization.py) to display input-output data in static and animated plots. These functions use Matplotlib for visualization and FFMPEG for saving animations in various formats (e.g., GIF, MP4).
+Custom functions are implemented in [`utilities/visualization/data_visualization.py`](utilities/visualization/data_visualization.py) to display input-output data in static and animated plots. These functions use Matplotlib for visualization and FFmpeg for saving animations in various formats (e.g., GIF, MP4).
 
 ### Examples
 The `examples` directory includes scripts to demonstrate the operation of the Data-Driven MPC controller and reproduce the results presented in the paper.
