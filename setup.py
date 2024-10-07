@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     author='Pável A. Campos-Peña',
     author_email='pcamposp@uni.pe',
-    url='https://github.com/pavelacamposp/direct-data-driven-mpc',
+    url='https://github.com/pavelacamposp/direct_data_driven_mpc',
     packages=setuptools.find_packages(include=["direct_data_driven_mpc*",
                                                "utilities*",
                                                "examples*"]),
