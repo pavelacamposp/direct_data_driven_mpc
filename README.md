@@ -156,6 +156,11 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Citation
 If you use this implementation in your research, please cite the original paper as follows:
+
+### Plain text citation:
+J. Berberich, J. Köhler, M. A. Müller and F. Allgöwer, "Data-Driven Model Predictive Control With Stability and Robustness Guarantees," in IEEE Transactions on Automatic Control, vol. 66, no. 4, pp. 1702-1717, April 2021, doi: 10.1109/TAC.2020.3000182.
+
+### BibTeX entry:
 ```bibtex
 @article{Berberich_2021,
    title={Data-Driven Model Predictive Control With Stability and Robustness Guarantees},
